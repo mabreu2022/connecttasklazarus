@@ -1,16 +1,19 @@
 # ConnectTask Lazarus
 
-Um clone moderno no estilo Trello desenvolvido em **Lazarus (Free Pascal)**, contendo uma suíte de componentes visuais personalizados e de alto desempenho para gerenciamento de tarefas (cards).
+O **ConnectTask** é um projeto público e comunitário focado no desenvolvimento de um sistema completo de gerenciamento de tarefas no estilo **Trello**. Desenvolvido em **Lazarus (Free Pascal)**, o projeto utiliza a robustez do banco de dados **Firebird 5.0** e traz um conjunto exclusivo de componentes visuais personalizados de alto desempenho.
+
+Qualquer pessoa da comunidade é bem-vinda para contribuir, testar e evoluir o ecossistema!
 
 ---
 
 ## 🚀 Funcionalidades do Projeto
 
-- **Organização Kanban:** Gerenciamento visual de tarefas.
-- **Banco de Dados Relacional:** Estrutura SQL robusta para persistência de dados.
-- **Componentes Visuais Customizados:** Desenvolvidos do zero usando primitivas gráficas nativas do Lazarus para garantir desempenho rápido e um visual premium.
+- **Organização Kanban:** Gerenciamento visual e intuitivo de fluxos de trabalho e tarefas.
+- **Banco de Dados Firebird 5.0:** Estrutura relacional robusta, moderna e de alto desempenho para persistência de dados.
+- **Componentes Visuais Customizados:** Desenvolvidos nativamente para garantir leveza e design moderno.
 
 ---
+
 
 ## 🎨 Pacote de Componentes (`componentes/cards/cards.lpk`)
 
@@ -75,4 +78,5 @@ C:\Fontes\connecttask lazarus\
 - **IDE:** [Lazarus 3.0+](https://www.lazarus-ide.org/)
 - **Compilador:** Free Pascal Compiler (FPC)
 - **Linguagem:** Object Pascal (Modo ObjFPC)
-- **SGBD:** SQL (Suporte a banco de dados relacional)
+- **Banco de Dados:** [Firebird 5.0](https://firebirdsql.org/) (SGBD relacional de alta performance)
+
