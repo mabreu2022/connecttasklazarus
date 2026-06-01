@@ -1,0 +1,141 @@
+object DataModule1: TDataModule1
+  OldCreateOrder = False
+  Height = 407
+  HorizontalOffset = 1720
+  VerticalOffset = 250
+  Width = 710
+  object IBDatabase1: TIBDatabase
+    Connected = False
+    LoginPrompt = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DatabaseName = '127.0.0.1/3060:C:\Projetos Antigravity\Conect Trelo\Database\connecttask.fdb'
+    Params.Strings = (
+      'user_name=SYSDBA'
+      'password=masterkey'
+      'lc_ctype=UTF8'
+    )
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 76
+    Top = 75
+  end
+  object IBQ_Workspace: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select A.ID, A.TITLE, A.BACKGROUND, A.WORKSPACEID, A.OWNERID, A.'
+      'ISPUBLIC, A.PASSWORD, A.WORKSCHEDULE, A.CREATEDAT, A.MEETINGPASSWORD '
+      'From "Board" A'
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 172
+    Top = 75
+  end
+  object IBQ_workspacepoidusuairo: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'SELECT'
+      '    W.ID AS WORKSPACE_ID,'
+      '    W.NAME AS WORKSPACE_NAME,'
+      '    W.OWNERID AS WORKSPACE_OWNERID,'
+      '    W.CREATEDAT AS WORKSPACE_CREATEDAT,'
+      '    M.ROLE AS USER_ROLE,'
+      '    M.JOINEDAT AS USER_JOINEDAT -- Corrigido para a grafia exata do banco'
+      'FROM "Workspace" W'
+      'INNER JOIN "WorkspaceMember" M ON W.ID = M.WORKSPACEID'
+      'WHERE M.USERID = :USERID'
+      'ORDER BY W.NAME;'
+      ''
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'USERID'
+        ParamType = ptInput
+      end>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 177
+    Top = 145
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'USERID'
+        ParamType = ptInput
+      end>
+  end
+  object IBQ_WorksSpace_E_Boards: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'SELECT'
+      '    W.ID AS WORKSPACE_ID,'
+      '    W.NAME AS WORKSPACE_NAME,'
+      '    W.OWNERID AS WORKSPACE_OWNERID,'
+      '    W.CREATEDAT AS WORKSPACE_CREATEDAT,'
+      '    M.ROLE AS USER_ROLE,'
+      '    M.JOINEDAT AS USER_JOINEDAT,'
+      '    B.ID AS BOARD_ID,'
+      '    B.TITLE AS BOARD_TITLE,'
+      '    B.BACKGROUND AS BOARD_BACKGROUND,'
+      '    B.ISPUBLIC AS BOARD_ISPUBLIC'
+      'FROM "Workspace" W'
+      'INNER JOIN "WorkspaceMember" M ON W.ID = M.WORKSPACEID'
+      'LEFT JOIN "Board" B ON W.ID = B.WORKSPACEID'
+      'WHERE M.USERID = :USERID'
+      'ORDER BY W.NAME, B.TITLE;'
+      ''
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'USERID'
+        ParamType = ptInput
+      end>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 172
+    Top = 220
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'USERID'
+        ParamType = ptInput
+      end>
+  end
+end

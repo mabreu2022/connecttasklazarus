@@ -1,0 +1,131 @@
+object Form1: TForm1
+  Left = 350
+  Height = 598
+  Top = 250
+  Width = 802
+  Caption = 'Connect Task versão Lazarus 1.0'
+  ClientHeight = 598
+  ClientWidth = 802
+  Position = poScreenCenter
+  LCLVersion = '4.6.0.0'
+  WindowState = wsMaximized
+  object HeaderScrollBox1: THeaderScrollBox
+    Left = 0
+    Height = 598
+    Top = 0
+    Width = 232
+    HorzScrollBar.Page = 75
+    VertScrollBar.Page = 530
+    Align = alLeft
+    ClientHeight = 594
+    ClientWidth = 228
+    Color = clMoneyGreen
+    Font.Color = clWhite
+    ParentBackground = False
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 0
+    HeaderPanel.Left = 0
+    HeaderPanel.Height = 50
+    HeaderPanel.Top = 0
+    HeaderPanel.Width = 228
+    HeaderPanel.Align = alTop
+    HeaderPanel.BevelOuter = bvNone
+    HeaderPanel.Caption = 'BackLog'
+    HeaderPanel.Color = clBackground
+    HeaderPanel.ParentBackground = False
+    HeaderPanel.ParentColor = False
+    HeaderPanel.TabOrder = 0
+    HeaderColor = clBackground
+    HeaderCaption = 'BackLog'
+    object TaskCard1: TTaskCard
+      Left = 0
+      Height = 240
+      Top = 50
+      Width = 228
+      TaskCode = '#6F4895'
+      TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
+      TaskDate = '22/01/2026'
+      UserName = 'fulano'
+      BackgroundColor = clPurple
+      TextColor = clYellow
+      Align = alTop
+      Font.Color = clYellow
+    end
+    object TaskCard2: TTaskCard
+      Left = 0
+      Height = 240
+      Top = 290
+      Width = 228
+      TaskCode = '#6F4895'
+      TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
+      TaskDate = '22/01/2026'
+      UserName = 'mauricio abreu'
+      Align = alTop
+    end
+  end
+  object HeaderScrollBox2: THeaderScrollBox
+    Left = 232
+    Height = 598
+    Top = 0
+    Width = 216
+    HorzScrollBar.Page = 75
+    VertScrollBar.Page = 594
+    Align = alLeft
+    ClientHeight = 594
+    ClientWidth = 195
+    Font.Color = clWhite
+    ParentFont = False
+    TabOrder = 1
+    HeaderPanel.Left = 0
+    HeaderPanel.Height = 50
+    HeaderPanel.Top = 0
+    HeaderPanel.Width = 195
+    HeaderPanel.Align = alTop
+    HeaderPanel.BevelOuter = bvNone
+    HeaderPanel.Caption = 'Design'
+    HeaderPanel.Color = clBlack
+    HeaderPanel.ParentBackground = False
+    HeaderPanel.ParentColor = False
+    HeaderPanel.TabOrder = 0
+    HeaderColor = clBlack
+    HeaderCaption = 'Design'
+    object TaskCard3: TTaskCard
+      Left = 0
+      Height = 240
+      Top = 50
+      Width = 195
+      TaskCode = '#6F4895'
+      TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
+      TaskDate = '22/01/2026'
+      UserName = 'mauricio abreu'
+      BackgroundColor = clGreen
+      Align = alTop
+    end
+    object TaskCard4: TTaskCard
+      Left = 0
+      Height = 240
+      Top = 290
+      Width = 195
+      TaskCode = '#6F4895'
+      TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
+      TaskDate = '22/01/2026'
+      UserName = 'fulano'
+      BackgroundColor = clPurple
+      TextColor = clYellow
+      Align = alTop
+      Font.Color = clYellow
+    end
+    object TaskCard5: TTaskCard
+      Left = 0
+      Height = 240
+      Top = 530
+      Width = 195
+      TaskCode = '#6F4895'
+      TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
+      TaskDate = '22/01/2026'
+      UserName = 'mauricio abreu'
+      Align = alTop
+    end
+  end
+end

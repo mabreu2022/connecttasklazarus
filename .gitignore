@@ -1,0 +1,16 @@
+# Lazarus compiler outputs
+*.ppu
+*.o
+*.a
+*.compiled
+*.or
+
+# Lazarus IDE files (session, recovery)
+*.lps
+*.bak
+backup/
+lib/
+*~
+
+# Compiled executables
+*.exe
