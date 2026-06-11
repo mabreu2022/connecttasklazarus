@@ -8,7 +8,7 @@ unit cards;
 interface
 
 uses
-  uComponenteCard, uHeaderScrollBox, uTaskCard, LazarusPackageIntf;
+  uComponenteCard, uHeaderScrollBox, uTaskCard, uBoardCard, uScrollBoardCards, uPanelAreaTrabalho, LazarusPackageIntf;
 
 implementation
 
@@ -16,6 +16,9 @@ procedure Register;
 begin
   RegisterUnit('uHeaderScrollBox', @uHeaderScrollBox.Register);
   RegisterUnit('uTaskCard', @uTaskCard.Register);
+  RegisterUnit('uBoardCard', @uBoardCard.Register);
+  RegisterUnit('uScrollBoardCards', @uScrollBoardCards.Register);
+  RegisterUnit('uPanelAreaTrabalho', @uPanelAreaTrabalho.Register);
 end;
 
 initialization

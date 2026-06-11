@@ -11,7 +11,7 @@
         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)\"/>
       </SearchPaths>
     </CompilerOptions>
-    <Files Count="3">
+    <Files Count="6">
       <Item1>
         <Filename Value="ucomponentecard.pas"/>
         <UnitName Value="uComponenteCard"/>
@@ -26,6 +26,21 @@
         <HasRegisterProc Value="True"/>
         <UnitName Value="uTaskCard"/>
       </Item3>
+      <Item4>
+        <Filename Value="uboardcard.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="uBoardCard"/>
+      </Item4>
+      <Item5>
+        <Filename Value="uscrollboardcards.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="uScrollBoardCards"/>
+      </Item5>
+      <Item6>
+        <Filename Value="upanelareatrabalho.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="uPanelAreaTrabalho"/>
+      </Item6>
     </Files>
     <RequiredPkgs Count="2">
       <Item1>

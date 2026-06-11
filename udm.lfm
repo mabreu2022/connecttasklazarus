@@ -1,7 +1,7 @@
 object DataModule1: TDataModule1
   OldCreateOrder = False
   Height = 407
-  HorizontalOffset = 1720
+  HorizontalOffset = 1160
   VerticalOffset = 250
   Width = 710
   object IBDatabase1: TIBDatabase
