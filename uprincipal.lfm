@@ -7,125 +7,109 @@ object Form1: TForm1
   ClientHeight = 598
   ClientWidth = 802
   Position = poScreenCenter
-  LCLVersion = '4.6.0.0'
+  LCLVersion = '4.8.0.0'
   WindowState = wsMaximized
-  object HeaderScrollBox1: THeaderScrollBox
+  object Panel1: TPanel
     Left = 0
-    Height = 598
+    Height = 50
     Top = 0
-    Width = 232
-    HorzScrollBar.Page = 75
-    VertScrollBar.Page = 530
-    Align = alLeft
-    ClientHeight = 594
-    ClientWidth = 228
-    Color = clMoneyGreen
-    Font.Color = clWhite
-    ParentBackground = False
-    ParentColor = False
-    ParentFont = False
+    Width = 802
+    Align = alTop
+    ClientHeight = 50
+    ClientWidth = 802
     TabOrder = 0
-    HeaderPanel.Left = 0
-    HeaderPanel.Height = 50
-    HeaderPanel.Top = 0
-    HeaderPanel.Width = 228
-    HeaderPanel.Align = alTop
-    HeaderPanel.BevelOuter = bvNone
-    HeaderPanel.Caption = 'BackLog'
-    HeaderPanel.Color = clBackground
-    HeaderPanel.ParentBackground = False
-    HeaderPanel.ParentColor = False
-    HeaderPanel.TabOrder = 0
-    HeaderColor = clBackground
-    HeaderCaption = 'BackLog'
-    object TaskCard1: TTaskCard
-      Left = 0
-      Height = 240
-      Top = 50
-      Width = 228
-      TaskCode = '#6F4895'
-      TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
-      TaskDate = '22/01/2026'
-      UserName = 'fulano'
-      BackgroundColor = clPurple
-      TextColor = clYellow
-      Align = alTop
-      Font.Color = clYellow
+    object BitBtn1: TBitBtn
+      Left = 18
+      Height = 30
+      Top = 8
+      Width = 75
+      Caption = 'Menu'
+      TabOrder = 0
     end
-    object TaskCard2: TTaskCard
-      Left = 0
-      Height = 240
-      Top = 290
-      Width = 228
-      TaskCode = '#6F4895'
-      TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
-      TaskDate = '22/01/2026'
-      UserName = 'mauricio abreu'
-      Align = alTop
+    object Edit1: TEdit
+      Left = 112
+      Height = 23
+      Top = 11
+      Width = 331
+      TabOrder = 1
+      Text = 'Edit1'
+    end
+    object BitBtn2: TBitBtn
+      Left = 456
+      Height = 30
+      Top = 8
+      Width = 75
+      Caption = 'Pesquisar'
+      TabOrder = 2
     end
   end
-  object HeaderScrollBox2: THeaderScrollBox
-    Left = 232
-    Height = 598
-    Top = 0
-    Width = 216
-    HorzScrollBar.Page = 75
-    VertScrollBar.Page = 594
-    Align = alLeft
-    ClientHeight = 594
-    ClientWidth = 195
-    Font.Color = clWhite
-    ParentFont = False
+  object Panel2: TPanel
+    Left = 0
+    Height = 84
+    Top = 60
+    Width = 802
+    Align = alTop
+    BorderSpacing.Top = 10
+    ClientHeight = 84
+    ClientWidth = 802
+    Color = clBlue
+    ParentBackground = False
+    ParentColor = False
     TabOrder = 1
-    HeaderPanel.Left = 0
-    HeaderPanel.Height = 50
-    HeaderPanel.Top = 0
-    HeaderPanel.Width = 195
-    HeaderPanel.Align = alTop
-    HeaderPanel.BevelOuter = bvNone
-    HeaderPanel.Caption = 'Design'
-    HeaderPanel.Color = clBlack
-    HeaderPanel.ParentBackground = False
-    HeaderPanel.ParentColor = False
-    HeaderPanel.TabOrder = 0
-    HeaderColor = clBlack
-    HeaderCaption = 'Design'
-    object TaskCard3: TTaskCard
-      Left = 0
-      Height = 240
-      Top = 50
-      Width = 195
-      TaskCode = '#6F4895'
-      TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
-      TaskDate = '22/01/2026'
-      UserName = 'mauricio abreu'
-      BackgroundColor = clGreen
-      Align = alTop
+    object Label1: TLabel
+      Left = 24
+      Height = 15
+      Top = 8
+      Width = 109
+      Caption = 'Sua área de Trabalho'
     end
-    object TaskCard4: TTaskCard
-      Left = 0
-      Height = 240
-      Top = 290
-      Width = 195
-      TaskCode = '#6F4895'
-      TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
-      TaskDate = '22/01/2026'
-      UserName = 'fulano'
-      BackgroundColor = clPurple
-      TextColor = clYellow
-      Align = alTop
-      Font.Color = clYellow
+    object BitBtn3: TBitBtn
+      Left = 639
+      Height = 62
+      Top = 11
+      Width = 152
+      Align = alRight
+      BorderSpacing.Left = 10
+      BorderSpacing.Top = 10
+      BorderSpacing.Right = 10
+      BorderSpacing.Bottom = 10
+      Caption = 'Nova área de Trabalho'
+      TabOrder = 0
     end
-    object TaskCard5: TTaskCard
-      Left = 0
-      Height = 240
-      Top = 530
-      Width = 195
-      TaskCode = '#6F4895'
-      TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
-      TaskDate = '22/01/2026'
-      UserName = 'mauricio abreu'
-      Align = alTop
+    object BitBtn4: TBitBtn
+      Left = 488
+      Height = 61
+      Top = 11
+      Width = 152
+      BorderSpacing.Top = 10
+      BorderSpacing.Right = 10
+      BorderSpacing.Bottom = 10
+      Caption = 'Novo quadro'
+      TabOrder = 1
     end
+    object Label2: TLabel
+      Left = 26
+      Height = 15
+      Top = 55
+      Width = 82
+      Caption = 'Mauricio Abreu'
+    end
+  end
+  object StatusBar1: TStatusBar
+    Left = 0
+    Height = 23
+    Top = 575
+    Width = 802
+    Panels = <>
+  end
+  object ScrollBox1: TScrollBox
+    Left = 0
+    Height = 431
+    Top = 144
+    Width = 802
+    HorzScrollBar.Page = 1
+    VertScrollBar.Page = 1
+    Align = alClient
+    TabOrder = 3
   end
 end

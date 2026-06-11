@@ -1,0 +1,296 @@
+object Form2: TForm2
+  Left = 350
+  Height = 490
+  Top = 250
+  Width = 1180
+  Caption = 'Form2'
+  ClientHeight = 490
+  ClientWidth = 1180
+  LCLVersion = '4.8.0.0'
+  object Panel1: TPanel
+    Left = 0
+    Height = 50
+    Top = 0
+    Width = 1180
+    Align = alTop
+    ClientHeight = 50
+    ClientWidth = 1180
+    TabOrder = 0
+    object BitBtn1: TBitBtn
+      Left = 11
+      Height = 48
+      Top = 1
+      Width = 75
+      Align = alLeft
+      BorderSpacing.Left = 10
+      Caption = 'BitBtn1'
+      TabOrder = 0
+    end
+    object Edit1: TEdit
+      Left = 96
+      Height = 23
+      Top = 13
+      Width = 274
+      TabOrder = 1
+      Text = 'Edit1'
+    end
+    object BitBtn2: TBitBtn
+      Left = 376
+      Height = 30
+      Top = 8
+      Width = 75
+      Caption = 'BitBtn2'
+      TabOrder = 2
+    end
+    object BitBtn3: TBitBtn
+      Left = 456
+      Height = 30
+      Top = 8
+      Width = 75
+      Caption = 'BitBtn3'
+      TabOrder = 3
+    end
+    object BitBtn4: TBitBtn
+      Left = 536
+      Height = 30
+      Top = 8
+      Width = 75
+      Caption = 'BitBtn4'
+      TabOrder = 4
+    end
+    object BitBtn5: TBitBtn
+      Left = 616
+      Height = 30
+      Top = 8
+      Width = 75
+      Caption = 'BitBtn5'
+      TabOrder = 5
+    end
+    object Shape1: TShape
+      Left = 704
+      Height = 29
+      Top = 7
+      Width = 29
+      Shape = stCircle
+    end
+  end
+  object StatusBar1: TStatusBar
+    Left = 0
+    Height = 23
+    Top = 467
+    Width = 1180
+    Panels = <>
+  end
+  object ScrollBox1: TScrollBox
+    Left = 0
+    Height = 417
+    Top = 50
+    Width = 1180
+    HorzScrollBar.Page = 1176
+    VertScrollBar.Page = 250
+    Align = alClient
+    ClientHeight = 396
+    ClientWidth = 1176
+    TabOrder = 2
+    object Panel2: TPanel
+      Left = 1070
+      Height = 396
+      Top = 0
+      Width = 165
+      Align = alRight
+      Caption = 'Panel2'
+      ClientHeight = 396
+      ClientWidth = 165
+      TabOrder = 0
+      object Panel3: TPanel
+        Left = 1
+        Height = 50
+        Top = 1
+        Width = 163
+        Align = alTop
+        Caption = 'Panel3'
+        TabOrder = 0
+      end
+    end
+    object ScrollBox2: TScrollBox
+      Left = 0
+      Height = 396
+      Top = 0
+      Width = 1070
+      HorzScrollBar.Page = 1066
+      VertScrollBar.Page = 246
+      Align = alClient
+      ClientHeight = 392
+      ClientWidth = 1066
+      TabOrder = 1
+      object HeaderScrollBox1: THeaderScrollBox
+        Left = 10
+        Height = 392
+        Top = 0
+        Width = 166
+        HorzScrollBar.Page = 75
+        VertScrollBar.Page = 242
+        Align = alLeft
+        BorderSpacing.Left = 10
+        ClientHeight = 388
+        ClientWidth = 162
+        TabOrder = 0
+        HeaderPanel.Left = 0
+        HeaderPanel.Height = 50
+        HeaderPanel.Top = 0
+        HeaderPanel.Width = 162
+        HeaderPanel.Align = alTop
+        HeaderPanel.BevelOuter = bvNone
+        HeaderPanel.Caption = 'BackLog'
+        HeaderPanel.TabOrder = 0
+        HeaderCaption = 'BackLog'
+        object TaskCard1: TTaskCard
+          Left = 0
+          Height = 192
+          Top = 50
+          Width = 162
+          TaskCode = '#6F4895'
+          TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
+          TaskDate = '22/01/2026'
+          UserName = 'mauricio abreu'
+          Align = alTop
+        end
+      end
+      object HeaderScrollBox2: THeaderScrollBox
+        Left = 186
+        Height = 392
+        Top = 0
+        Width = 166
+        HorzScrollBar.Page = 1
+        VertScrollBar.Page = 50
+        Align = alLeft
+        BorderSpacing.Left = 10
+        ClientHeight = 388
+        ClientWidth = 162
+        TabOrder = 1
+        HeaderPanel.Left = 0
+        HeaderPanel.Height = 50
+        HeaderPanel.Top = 0
+        HeaderPanel.Width = 162
+        HeaderPanel.Align = alTop
+        HeaderPanel.BevelOuter = bvNone
+        HeaderPanel.Caption = 'Design'
+        HeaderPanel.TabOrder = 0
+        HeaderCaption = 'Design'
+      end
+      object HeaderScrollBox3: THeaderScrollBox
+        Left = 362
+        Height = 392
+        Top = 0
+        Width = 166
+        HorzScrollBar.Page = 75
+        VertScrollBar.Page = 242
+        Align = alLeft
+        BorderSpacing.Left = 10
+        ClientHeight = 388
+        ClientWidth = 162
+        TabOrder = 2
+        HeaderPanel.Left = 0
+        HeaderPanel.Height = 50
+        HeaderPanel.Top = 0
+        HeaderPanel.Width = 162
+        HeaderPanel.Align = alTop
+        HeaderPanel.BevelOuter = bvNone
+        HeaderPanel.Caption = 'A Fazer'
+        HeaderPanel.TabOrder = 0
+        HeaderCaption = 'A Fazer'
+        object TaskCard2: TTaskCard
+          Left = 0
+          Height = 192
+          Top = 50
+          Width = 162
+          TaskCode = '#6F4895'
+          TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
+          TaskDate = '22/01/2026'
+          UserName = 'mauricio abreu'
+          BackgroundColor = clGreen
+          Align = alTop
+        end
+      end
+      object HeaderScrollBox4: THeaderScrollBox
+        Left = 538
+        Height = 392
+        Top = 0
+        Width = 166
+        HorzScrollBar.Page = 75
+        VertScrollBar.Page = 242
+        Align = alLeft
+        BorderSpacing.Left = 10
+        ClientHeight = 388
+        ClientWidth = 162
+        TabOrder = 3
+        HeaderPanel.Left = 0
+        HeaderPanel.Height = 50
+        HeaderPanel.Top = 0
+        HeaderPanel.Width = 162
+        HeaderPanel.Align = alTop
+        HeaderPanel.BevelOuter = bvNone
+        HeaderPanel.Caption = 'Em Andamento'
+        HeaderPanel.TabOrder = 0
+        HeaderCaption = 'Em Andamento'
+        object TaskCard3: TTaskCard
+          Left = 0
+          Height = 192
+          Top = 50
+          Width = 162
+          TaskCode = '#6F4895'
+          TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
+          TaskDate = '22/01/2026'
+          UserName = 'mauricio abreu'
+          BackgroundColor = clRed
+          Align = alTop
+        end
+      end
+      object HeaderScrollBox5: THeaderScrollBox
+        Left = 714
+        Height = 392
+        Top = 0
+        Width = 166
+        HorzScrollBar.Page = 1
+        VertScrollBar.Page = 50
+        Align = alLeft
+        BorderSpacing.Left = 10
+        ClientHeight = 388
+        ClientWidth = 162
+        TabOrder = 4
+        HeaderPanel.Left = 0
+        HeaderPanel.Height = 50
+        HeaderPanel.Top = 0
+        HeaderPanel.Width = 162
+        HeaderPanel.Align = alTop
+        HeaderPanel.BevelOuter = bvNone
+        HeaderPanel.Caption = 'Revisão de Código'
+        HeaderPanel.TabOrder = 0
+        HeaderCaption = 'Revisão de Código'
+      end
+      object HeaderScrollBox6: THeaderScrollBox
+        Left = 890
+        Height = 392
+        Top = 0
+        Width = 166
+        HorzScrollBar.Page = 1
+        VertScrollBar.Page = 50
+        Align = alLeft
+        BorderSpacing.Left = 10
+        BorderSpacing.Right = 10
+        ClientHeight = 388
+        ClientWidth = 162
+        TabOrder = 5
+        HeaderPanel.Left = 0
+        HeaderPanel.Height = 50
+        HeaderPanel.Top = 0
+        HeaderPanel.Width = 162
+        HeaderPanel.Align = alTop
+        HeaderPanel.BevelOuter = bvNone
+        HeaderPanel.Caption = 'Concluído'
+        HeaderPanel.TabOrder = 0
+        HeaderCaption = 'Concluído'
+      end
+    end
+  end
+end

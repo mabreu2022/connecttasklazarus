@@ -26,6 +26,7 @@ type
     // Hover states for drawing
     FHoveredButton: Integer; // 0 = none, 1 = copy, 2 = edit, 3 = delete
     FIsHovered: Boolean;
+    FIsDragTarget: Boolean;
     
     // Events
     FOnCopy: TNotifyEvent;
@@ -57,9 +58,11 @@ type
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseLeave; override;
     procedure MouseEnter; override;
+    procedure DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean); override;
     
   public
     constructor Create(AOwner: TComponent); override;
+    procedure DragDrop(Source: TObject; X, Y: Integer); override;
     
   published
     property TaskCode: string read FTaskCode write SetTaskCode;
@@ -88,11 +91,23 @@ type
     property Visible;
     property OnClick;
     property OnDblClick;
+    
+    // Drag properties
+    property DragCursor;
+    property DragMode;
+    property DragKind;
+    property OnDragOver;
+    property OnDragDrop;
+    property OnEndDrag;
+    property OnStartDrag;
   end;
 
 procedure Register;
 
 implementation
+
+uses
+  uHeaderScrollBox;
 
 procedure Register;
 begin
@@ -253,18 +268,29 @@ begin
 
   // 1. Draw rounded background
   Canvas.Brush.Color := FBackgroundColor;
-  if FIsHovered then
-    Canvas.Pen.Color := TColor(RGB(
-      Min(255, Red(FBorderColor) + 30),
-      Min(255, Green(FBorderColor) + 30),
-      Min(255, Blue(FBorderColor) + 30)
-    ))
+  if FIsDragTarget then
+  begin
+    Canvas.Pen.Color := FUserColor;
+    Canvas.Pen.Width := 2;
+  end
   else
-    Canvas.Pen.Color := FBorderColor;
+  begin
+    Canvas.Pen.Width := 1;
+    if FIsHovered then
+      Canvas.Pen.Color := TColor(RGB(
+        Min(255, Red(FBorderColor) + 30),
+        Min(255, Green(FBorderColor) + 30),
+        Min(255, Blue(FBorderColor) + 30)
+      ))
+    else
+      Canvas.Pen.Color := FBorderColor;
+  end;
 
-  Canvas.Pen.Width := 1;
   Canvas.Pen.Style := psSolid;
-  Canvas.RoundRect(0, 0, Width, Height, 16, 16);
+  if FIsDragTarget then
+    Canvas.RoundRect(1, 1, Width - 1, Height - 1, 16, 16)
+  else
+    Canvas.RoundRect(0, 0, Width, Height, 16, 16);
 
   // 2. Draw Task Code (Top-Left)
   Canvas.Font.Name := 'Segoe UI';
@@ -475,6 +501,8 @@ begin
       1: DoCopy;
       2: DoEdit;
       3: DoDelete;
+    else
+      BeginDrag(False);
     end;
   end;
 end;
@@ -493,6 +521,41 @@ begin
   FHoveredButton := 0;
   Cursor := crDefault;
   Invalidate;
+end;
+
+procedure TTaskCard.DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+begin
+  inherited DragOver(Source, X, Y, State, Accept);
+  Accept := (Source is TTaskCard) and (Source <> Self);
+  
+  if Accept then
+  begin
+    case State of
+      dsDragEnter:
+        begin
+          FIsDragTarget := True;
+          Invalidate;
+        end;
+      dsDragLeave:
+        begin
+          FIsDragTarget := False;
+          Invalidate;
+        end;
+    end;
+  end;
+end;
+
+procedure TTaskCard.DragDrop(Source: TObject; X, Y: Integer);
+begin
+  inherited DragDrop(Source, X, Y);
+  FIsDragTarget := False;
+  Invalidate;
+  
+  if (Source is TTaskCard) and (Parent <> nil) then
+  begin
+    if Parent is THeaderScrollBox then
+      THeaderScrollBox(Parent).HandleCardDrop(TTaskCard(Source), Self);
+  end;
 end;
 
 end.
