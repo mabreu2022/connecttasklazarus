@@ -53,7 +53,7 @@ var
 implementation
 
 uses
-  uListas, uLogin, udm, db, IBQuery;
+  uListas, uLogin, udm, db, IBQuery, uNewBoard;
 
 {$R *.lfm}
 
@@ -393,15 +393,26 @@ begin
     try
       Q.Database := DataModule1.IBDatabase1;
       Q.Transaction := DataModule1.IBTransaction1;
-      Q.SQL.Text := 'INSERT INTO "Workspace" (NAME, OWNERID) VALUES (:NAME, :OWNERID) RETURNING ID';
+      
+      // Use ExecSQL + SELECT MAX(ID) to get the generated workspace ID safely (cross-platform compatible)
+      Q.SQL.Text := 'INSERT INTO "Workspace" (NAME, OWNERID) VALUES (:NAME, :OWNERID)';
+      Q.ParamByName('NAME').DataType := ftString;
       Q.ParamByName('NAME').AsString := WorkspaceName;
+      Q.ParamByName('OWNERID').DataType := ftInteger;
+      Q.ParamByName('OWNERID').AsInteger := LoggedUserID;
+      Q.ExecSQL;
+      
+      Q.SQL.Text := 'SELECT MAX(ID) FROM "Workspace" WHERE OWNERID = :OWNERID';
+      Q.ParamByName('OWNERID').DataType := ftInteger;
       Q.ParamByName('OWNERID').AsInteger := LoggedUserID;
       Q.Open;
       NewWID := Q.Fields[0].AsInteger;
       Q.Close;
 
       Q.SQL.Text := 'INSERT INTO "WorkspaceMember" (USERID, WORKSPACEID, "ROLE") VALUES (:USERID, :WORKSPACEID, ''OWNER'')';
+      Q.ParamByName('USERID').DataType := ftInteger;
       Q.ParamByName('USERID').AsInteger := LoggedUserID;
+      Q.ParamByName('WORKSPACEID').DataType := ftInteger;
       Q.ParamByName('WORKSPACEID').AsInteger := NewWID;
       Q.ExecSQL;
 
@@ -462,36 +473,55 @@ end;
 procedure TForm1.WorkspacePanelCreateBoard(Sender: TObject);
 var
   Workspace: TPanelAreaTrabalho;
-  CardsContainer: TScrollBoardCards;
   NewCard: TBoardCard;
-  BoardTitle: string;
   Q: TIBQuery;
   NewBID: Integer;
+  NewBoardForm: TFormNewBoard;
+  FinalWorkspaceID: Integer;
+  FinalWorkspaceHeader: TPanelAreaTrabalho;
+  FinalCardsContainer: TScrollBoardCards;
+  I: Integer;
+  Ctrl: TControl;
 begin
   Workspace := TPanelAreaTrabalho(Sender);
-  if (Workspace.LinkedControl <> nil) and (Workspace.LinkedControl is TScrollBoardCards) then
-  begin
-    CardsContainer := TScrollBoardCards(Workspace.LinkedControl);
-    BoardTitle := '';
-    if InputQuery('Novo Quadro', 'Digite o título do Quadro:', BoardTitle) then
+  
+  NewBoardForm := TFormNewBoard.CreateNew(Self);
+  try
+    NewBoardForm.PopulateWorkspaces(Workspace.WorkspaceID);
+    
+    if NewBoardForm.ShowModal = mrOk then
     begin
-      if Trim(BoardTitle) = '' then Exit;
-
       if LoggedUserID = 0 then
       begin
         ShowMessage('Erro: Nenhum usuário logado.');
         Exit;
       end;
 
+      FinalWorkspaceID := NewBoardForm.SelectedWorkspaceID;
+
       Q := TIBQuery.Create(nil);
       try
         Q.Database := DataModule1.IBDatabase1;
         Q.Transaction := DataModule1.IBTransaction1;
-        Q.SQL.Text := 'INSERT INTO "Board" (TITLE, BACKGROUND, WORKSPACEID, OWNERID, ISPUBLIC) ' +
-                      'VALUES (:TITLE, :BG, :WORKSPACEID, :OWNERID, TRUE) RETURNING ID';
-        Q.ParamByName('TITLE').AsString := BoardTitle;
-        Q.ParamByName('BG').AsString := 'hsl(200, 70%, 60%)'; // default pastel color
-        Q.ParamByName('WORKSPACEID').AsInteger := Workspace.WorkspaceID;
+        if NewBoardForm.SelectedPrivacyPublic then
+          Q.SQL.Text := 'INSERT INTO "Board" (TITLE, BACKGROUND, WORKSPACEID, OWNERID, ISPUBLIC) ' +
+                        'VALUES (:TITLE, :BG, :WORKSPACEID, :OWNERID, TRUE)'
+        else
+          Q.SQL.Text := 'INSERT INTO "Board" (TITLE, BACKGROUND, WORKSPACEID, OWNERID, ISPUBLIC) ' +
+                        'VALUES (:TITLE, :BG, :WORKSPACEID, :OWNERID, FALSE)';
+
+        Q.ParamByName('TITLE').DataType := ftString;
+        Q.ParamByName('TITLE').AsString := NewBoardForm.BoardTitleText;
+        Q.ParamByName('BG').DataType := ftString;
+        Q.ParamByName('BG').AsString := 'hsl(200, 70%, 60%)'; 
+        Q.ParamByName('WORKSPACEID').DataType := ftInteger;
+        Q.ParamByName('WORKSPACEID').AsInteger := FinalWorkspaceID;
+        Q.ParamByName('OWNERID').DataType := ftInteger;
+        Q.ParamByName('OWNERID').AsInteger := LoggedUserID;
+        Q.ExecSQL;
+        
+        Q.SQL.Text := 'SELECT MAX(ID) FROM "Board" WHERE OWNERID = :OWNERID';
+        Q.ParamByName('OWNERID').DataType := ftInteger;
         Q.ParamByName('OWNERID').AsInteger := LoggedUserID;
         Q.Open;
         NewBID := Q.Fields[0].AsInteger;
@@ -507,19 +537,39 @@ begin
       end;
       Q.Free;
 
-      NewCard := TBoardCard.Create(Self);
-      NewCard.Parent := CardsContainer;
-      NewCard.BoardID := NewBID;
-      NewCard.BoardTitle := BoardTitle;
-      NewCard.StartColor := $C87A3B; // Default BGR start color
-      NewCard.EndColor := $281E19;   // Default BGR end color
-      NewCard.OnEdit := @BoardCardEdit;
-      NewCard.OnSettings := @BoardCardSettings;
-      NewCard.OnDelete := @BoardCardDelete;
-      NewCard.OnClick := @BoardCardClick;
-      
-      CardsContainer.Invalidate;
+      // Find the visual container corresponding to the selected workspace
+      FinalWorkspaceHeader := nil;
+      FinalCardsContainer := nil;
+      for I := 0 to ScrollBox1.ControlCount - 1 do
+      begin
+        Ctrl := ScrollBox1.Controls[I];
+        if (Ctrl is TPanelAreaTrabalho) and (TPanelAreaTrabalho(Ctrl).WorkspaceID = FinalWorkspaceID) then
+        begin
+          FinalWorkspaceHeader := TPanelAreaTrabalho(Ctrl);
+          if (FinalWorkspaceHeader.LinkedControl <> nil) and (FinalWorkspaceHeader.LinkedControl is TScrollBoardCards) then
+            FinalCardsContainer := TScrollBoardCards(FinalWorkspaceHeader.LinkedControl);
+          Break;
+        end;
+      end;
+
+      // If we found the target container, add the card to it
+      if FinalCardsContainer <> nil then
+      begin
+        NewCard := TBoardCard.Create(Self);
+        NewCard.Parent := FinalCardsContainer;
+        NewCard.BoardID := NewBID;
+        NewCard.BoardTitle := NewBoardForm.BoardTitleText;
+        NewCard.StartColor := $C87A3B; // Default BGR start color
+        NewCard.EndColor := $281E19;   // Default BGR end color
+        NewCard.OnEdit := @BoardCardEdit;
+        NewCard.OnSettings := @BoardCardSettings;
+        NewCard.OnDelete := @BoardCardDelete;
+        NewCard.OnClick := @BoardCardClick;
+        FinalCardsContainer.Invalidate;
+      end;
     end;
+  finally
+    NewBoardForm.Free;
   end;
 end;
 
@@ -539,16 +589,19 @@ begin
     
     // Delete boards of this workspace
     Q.SQL.Text := 'DELETE FROM "Board" WHERE WORKSPACEID = :WID';
+    Q.ParamByName('WID').DataType := ftInteger;
     Q.ParamByName('WID').AsInteger := WID;
     Q.ExecSQL;
     
     // Delete members of this workspace
     Q.SQL.Text := 'DELETE FROM "WorkspaceMember" WHERE WORKSPACEID = :WID';
+    Q.ParamByName('WID').DataType := ftInteger;
     Q.ParamByName('WID').AsInteger := WID;
     Q.ExecSQL;
     
     // Delete the workspace itself
     Q.SQL.Text := 'DELETE FROM "Workspace" WHERE ID = :ID';
+    Q.ParamByName('ID').DataType := ftInteger;
     Q.ParamByName('ID').AsInteger := WID;
     Q.ExecSQL;
     
@@ -568,7 +621,9 @@ begin
     Q.Database := DataModule1.IBDatabase1;
     Q.Transaction := DataModule1.IBTransaction1;
     Q.SQL.Text := 'UPDATE "Board" SET TITLE = :TITLE WHERE ID = :ID';
+    Q.ParamByName('TITLE').DataType := ftString;
     Q.ParamByName('TITLE').AsString := TBoardCard(Sender).BoardTitle;
+    Q.ParamByName('ID').DataType := ftInteger;
     Q.ParamByName('ID').AsInteger := TBoardCard(Sender).BoardID;
     Q.ExecSQL;
     DataModule1.IBTransaction1.CommitRetaining;
@@ -587,10 +642,12 @@ begin
     Q.Database := DataModule1.IBDatabase1;
     Q.Transaction := DataModule1.IBTransaction1;
     Q.SQL.Text := 'UPDATE "Board" SET "PASSWORD" = :PASS WHERE ID = :ID';
+    Q.ParamByName('PASS').DataType := ftString;
     if TBoardCard(Sender).Password = '' then
       Q.ParamByName('PASS').Clear
     else
       Q.ParamByName('PASS').AsString := TBoardCard(Sender).Password;
+    Q.ParamByName('ID').DataType := ftInteger;
     Q.ParamByName('ID').AsInteger := TBoardCard(Sender).BoardID;
     Q.ExecSQL;
     DataModule1.IBTransaction1.CommitRetaining;
@@ -609,6 +666,7 @@ begin
     Q.Database := DataModule1.IBDatabase1;
     Q.Transaction := DataModule1.IBTransaction1;
     Q.SQL.Text := 'DELETE FROM "Board" WHERE ID = :ID';
+    Q.ParamByName('ID').DataType := ftInteger;
     Q.ParamByName('ID').AsInteger := TBoardCard(Sender).BoardID;
     Q.ExecSQL;
     DataModule1.IBTransaction1.CommitRetaining;
