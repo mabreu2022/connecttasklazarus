@@ -7,7 +7,7 @@ object Form3: TForm3
   Caption = 'Login'
   ClientHeight = 440
   ClientWidth = 460
-  Color = $0E0C0B
+  Color = 920587
   Position = poScreenCenter
   LCLVersion = '4.8.0.0'
   object pnlCard: TPanel
@@ -18,14 +18,16 @@ object Form3: TForm3
     Align = alClient
     BorderSpacing.Around = 30
     BevelOuter = bvNone
-    Color = $181311
+    ClientHeight = 380
+    ClientWidth = 400
+    Color = 1577745
     ParentBackground = False
     ParentColor = False
     TabOrder = 0
     object lblTitle: TLabel
       Left = 0
       Height = 25
-      Top = 30
+      Top = 0
       Width = 400
       Align = alTop
       Alignment = taCenter
@@ -43,7 +45,9 @@ object Form3: TForm3
       Top = 90
       Width = 340
       BevelOuter = bvNone
-      Color = $2A221F
+      ClientHeight = 44
+      ClientWidth = 340
+      Color = 2761247
       ParentBackground = False
       ParentColor = False
       TabOrder = 0
@@ -58,11 +62,12 @@ object Form3: TForm3
         BorderSpacing.Right = 12
         BorderSpacing.Bottom = 11
         BorderStyle = bsNone
-        Color = $2A221F
+        Color = 2761247
         Font.Color = clWhite
         Font.Height = -13
         Font.Name = 'Segoe UI'
         ParentFont = False
+        TabOrder = 0
         TextHint = 'Email'
       end
     end
@@ -72,7 +77,9 @@ object Form3: TForm3
       Top = 150
       Width = 340
       BevelOuter = bvNone
-      Color = $2A221F
+      ClientHeight = 44
+      ClientWidth = 340
+      Color = 2761247
       ParentBackground = False
       ParentColor = False
       TabOrder = 1
@@ -87,16 +94,19 @@ object Form3: TForm3
         BorderSpacing.Right = 12
         BorderSpacing.Bottom = 11
         BorderStyle = bsNone
-        Color = $2A221F
+        Color = 2761247
+        EchoMode = emPassword
         Font.Color = clWhite
         Font.Height = -13
         Font.Name = 'Segoe UI'
         ParentFont = False
         PasswordChar = '*'
+        TabOrder = 0
         TextHint = 'Password'
       end
     end
     object lblForgot: TLabel
+      Cursor = crHandPoint
       Left = 30
       Height = 15
       Top = 206
@@ -104,8 +114,7 @@ object Form3: TForm3
       Alignment = taRightJustify
       AutoSize = False
       Caption = 'Esqueci minha senha'
-      Cursor = crHandPoint
-      Font.Color = $E5464F
+      Font.Color = 15025743
       Font.Height = -11
       Font.Name = 'Segoe UI'
       Font.Style = [fsUnderline]
@@ -113,13 +122,15 @@ object Form3: TForm3
       ParentFont = False
     end
     object btnLogin: TPanel
+      Cursor = crHandPoint
       Left = 30
       Height = 44
       Top = 246
       Width = 340
       BevelOuter = bvNone
-      Color = $E5464F
-      Cursor = crHandPoint
+      ClientHeight = 44
+      ClientWidth = 340
+      Color = 15025743
       ParentBackground = False
       ParentColor = False
       TabOrder = 2
@@ -144,14 +155,14 @@ object Form3: TForm3
       end
     end
     object lblRegister: TLabel
+      Cursor = crHandPoint
       Left = 0
       Height = 15
-      Top = 335
+      Top = 365
       Width = 400
       Align = alBottom
       Alignment = taCenter
       Caption = 'Don''t have an account? Register'
-      Cursor = crHandPoint
       Font.Color = clWhite
       Font.Height = -12
       Font.Name = 'Segoe UI'

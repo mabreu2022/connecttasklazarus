@@ -5,25 +5,34 @@ object DataModule1: TDataModule1
   VerticalOffset = 250
   Width = 710
   object IBDatabase1: TIBDatabase
-    Connected = False
+    Connected = True
     LoginPrompt = False
     CreateIfNotExists = False
-    AllowStreamedConnected = False
-    DatabaseName = '127.0.0.1/3060:C:\Projetos Antigravity\Conect Trelo\Database\connecttask.fdb'
+    AllowStreamedConnected = True
+    DatabaseName = '45.225.129.86/3050:/home/ubuntu/Projestos Antigravity/Conect Trelo/Database/connecttask.fdb'
     Params.Strings = (
       'user_name=SYSDBA'
-      'password=masterkey'
+      'password=ZmrL9W79B48nUeUBOPK0'
       'lc_ctype=UTF8'
     )
+    DefaultTransaction = IBTransaction1
     IdleTimer = 0
     TraceFlags = []
     UseDefaultSystemCodePage = False
     Left = 76
     Top = 75
   end
+  object IBTransaction1: TIBTransaction
+    TransactionName = '{D139EC7F-5D58-482B-88B9-A5A0A064D82E}'
+    Active = False
+    DefaultDatabase = IBDatabase1
+    Left = 76
+    Top = 150
+  end
   object IBQ_Workspace: TIBQuery
     AllowAutoActivateTransaction = False
     Database = IBDatabase1
+    Transaction = IBTransaction1
     BufferChunks = 1000
     BufferChunksInFirstBlock = 50
     CachedUpdates = False
@@ -48,6 +57,7 @@ object DataModule1: TDataModule1
   object IBQ_workspacepoidusuairo: TIBQuery
     AllowAutoActivateTransaction = False
     Database = IBDatabase1
+    Transaction = IBTransaction1
     BufferChunks = 1000
     BufferChunksInFirstBlock = 50
     CachedUpdates = False
@@ -72,7 +82,7 @@ object DataModule1: TDataModule1
     )
     Params = <    
       item
-        DataType = ftUnknown
+        DataType = ftInteger
         Name = 'USERID'
         ParamType = ptInput
       end>
@@ -84,7 +94,7 @@ object DataModule1: TDataModule1
     Top = 145
     ParamData = <    
       item
-        DataType = ftUnknown
+        DataType = ftInteger
         Name = 'USERID'
         ParamType = ptInput
       end>
@@ -92,6 +102,7 @@ object DataModule1: TDataModule1
   object IBQ_WorksSpace_E_Boards: TIBQuery
     AllowAutoActivateTransaction = False
     Database = IBDatabase1
+    Transaction = IBTransaction1
     BufferChunks = 1000
     BufferChunksInFirstBlock = 50
     CachedUpdates = False
@@ -111,7 +122,7 @@ object DataModule1: TDataModule1
       '    B.ID AS BOARD_ID,'
       '    B.TITLE AS BOARD_TITLE,'
       '    B.BACKGROUND AS BOARD_BACKGROUND,'
-      '    B.ISPUBLIC AS BOARD_ISPUBLIC'
+      '    B."PASSWORD" AS BOARD_PASSWORD'
       'FROM "Workspace" W'
       'INNER JOIN "WorkspaceMember" M ON W.ID = M.WORKSPACEID'
       'LEFT JOIN "Board" B ON W.ID = B.WORKSPACEID'
@@ -141,6 +152,7 @@ object DataModule1: TDataModule1
   object IBQ_Login: TIBQuery
     AllowAutoActivateTransaction = False
     Database = IBDatabase1
+    Transaction = IBTransaction1
     BufferChunks = 1000
     BufferChunksInFirstBlock = 50
     CachedUpdates = False
@@ -168,6 +180,74 @@ object DataModule1: TDataModule1
       item
         DataType = ftString
         Name = 'EMAIL'
+        ParamType = ptInput
+      end>
+  end
+  object IBQ_List: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = IBTransaction1
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'SELECT ID, TITLE, IDX_POSITION, BOARDID FROM "List" WHERE BOARDID = :BOARDID ORDER BY IDX_POSITION;'
+    )
+    Params = <    
+      item
+        DataType = ftInteger
+        Name = 'BOARDID'
+        ParamType = ptInput
+      end>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 270
+    Top = 75
+    ParamData = <    
+      item
+        DataType = ftInteger
+        Name = 'BOARDID'
+        ParamType = ptInput
+      end>
+  end
+  object IBQ_Card: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = IBTransaction1
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'SELECT ID, TITLE, DESCRIPTION, PRIORITY, TICKETID, IDX_POSITION, LISTID, CREATORID, "hexColor" FROM "Card" WHERE LISTID = :LISTID ORDER BY IDX_POSITION;'
+    )
+    Params = <    
+      item
+        DataType = ftInteger
+        Name = 'LISTID'
+        ParamType = ptInput
+      end>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 270
+    Top = 145
+    ParamData = <    
+      item
+        DataType = ftInteger
+        Name = 'LISTID'
         ParamType = ptInput
       end>
   end

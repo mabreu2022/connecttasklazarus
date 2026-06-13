@@ -9,6 +9,9 @@ uses
 
 type
   TScrollBoardCards = class(TScrollBox)
+  private
+    FAllocatingHeight: Integer;
+    procedure SetHeightAsync(Data: PtrInt);
   protected
     procedure AlignControls(AControl: TControl; var ARect: TRect); override;
   public
@@ -33,13 +36,23 @@ end;
 constructor TScrollBoardCards.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  FAllocatingHeight := 0;
   
   Color := $222222;
   ParentColor := False;
-  AutoScroll := True;
+  AutoScroll := False;
+  HorzScrollBar.Visible := False;
+  VertScrollBar.Visible := False;
   
   Width := 600;
-  Height := 400;
+  Height := 140;
+end;
+
+procedure TScrollBoardCards.SetHeightAsync(Data: PtrInt);
+begin
+  if Height <> Data then
+    Height := Data;
+  FAllocatingHeight := 0;
 end;
 
 procedure TScrollBoardCards.AlignControls(AControl: TControl; var ARect: TRect);
@@ -82,12 +95,15 @@ begin
       CurX := CurX + Ctrl.Width + Margin;
     end;
     
-    // Auto-adjust container height to show all rows if aligned to alTop
-    if Align = alTop then
+    if ControlCount > 0 then
+      NewHeight := CurY + MaxRowHeight + Margin
+    else
+      NewHeight := 140;
+      
+    if (NewHeight <> Height) and (NewHeight <> FAllocatingHeight) then
     begin
-      NewHeight := CurY + MaxRowHeight + Margin;
-      if Height <> NewHeight then
-        Height := NewHeight;
+      FAllocatingHeight := NewHeight;
+      Application.QueueAsyncCall(@SetHeightAsync, NewHeight);
     end;
   finally
     EnableAlign;

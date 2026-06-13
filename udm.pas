@@ -13,10 +13,13 @@ type
 
   TDataModule1 = class(TDataModule)
     IBDatabase1: TIBDatabase;
+    IBTransaction1: TIBTransaction;
     IBQ_Workspace: TIBQuery;
     IBQ_workspacepoidusuairo: TIBQuery;
     IBQ_WorksSpace_E_Boards: TIBQuery;
     IBQ_Login: TIBQuery;
+    IBQ_List: TIBQuery;
+    IBQ_Card: TIBQuery;
   private
 
   public

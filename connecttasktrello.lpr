@@ -9,8 +9,7 @@ uses
   {$IFDEF HASAMIGA}
   athreads,
   {$ENDIF}
-  Interfaces, // this includes the LCL widgetset
-  Controls, Forms, uprincipal, uLogin, udm;
+  Interfaces, Controls, Forms, Dialogs, uprincipal, uLogin, udm;
 
 {$R *.res}
 
@@ -21,13 +20,8 @@ begin
   Application.MainFormOnTaskbar:=True;
   {$POP}
   Application.Initialize;
-  Application.CreateForm(TForm3, Form3);
-  if Form3.ShowModal = mrOk then
-  begin
-    Application.CreateForm(TForm1, Form1);
-    Application.Run;
-  end
-  else
-    Application.Terminate;
+  Application.CreateForm(TDataModule1, DataModule1);
+  Application.CreateForm(TForm1, Form1);
+  Application.Run;
 end.
 

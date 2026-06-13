@@ -60,6 +60,8 @@ begin
   try
     if not DataModule1.IBDatabase1.Connected then
       DataModule1.IBDatabase1.Connected := True;
+    if not DataModule1.IBTransaction1.Active then
+      DataModule1.IBTransaction1.StartTransaction;
   except
     on E: Exception do
     begin
@@ -87,7 +89,7 @@ begin
       LoggedUserID := DataModule1.IBQ_Login.FieldByName('ID').AsInteger;
       LoggedUserName := DataModule1.IBQ_Login.FieldByName('USERNAME').AsString;
       LoggedUserEmail := DataModule1.IBQ_Login.FieldByName('EMAIL').AsString;
-
+ 
       ModalResult := mrOk;
     end
     else
