@@ -6,6 +6,7 @@ object Form1: TForm1
   Caption = 'Connect Task versão Lazarus 1.0'
   ClientHeight = 598
   ClientWidth = 1126
+  Menu = MainMenu1
   Position = poScreenCenter
   LCLVersion = '4.8.0.0'
   OnCreate = FormCreate
@@ -86,5 +87,18 @@ object Form1: TForm1
     VertScrollBar.Page = 1
     Align = alClient
     TabOrder = 2
+  end
+  object MainMenu1: TMainMenu
+    Left = 343
+    Top = 185
+    object MenuItem1: TMenuItem
+      Caption = 'Arquivo'
+      object MenuItem2: TMenuItem
+        Caption = 'Sair'
+      end
+    end
+    object MenuItem3: TMenuItem
+      Caption = 'Configuração'
+    end
   end
 end

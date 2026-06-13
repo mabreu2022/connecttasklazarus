@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Buttons,
-  StdCtrls, ComCtrls, uTaskCard, uHeaderScrollBox, uBoardCard,
+  StdCtrls, ComCtrls, Menus, uTaskCard, uHeaderScrollBox, uBoardCard,
   uScrollBoardCards, uPanelAreaTrabalho;
 
 type
@@ -19,6 +19,10 @@ type
     BitBtn3: TBitBtn;
     BitBtn4: TBitBtn;
     Edit1: TEdit;
+    MainMenu1: TMainMenu;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
+    MenuItem3: TMenuItem;
     Panel1: TPanel;
     ScrollBox1: TScrollBox;
     StatusBar1: TStatusBar;
@@ -36,7 +40,9 @@ type
     procedure BoardCardDelete(Sender: TObject);
     procedure BoardCardClick(Sender: TObject);
   private
+    FTimerUpdate: TTimer;
     procedure ParseBoardColors(AColorStr: string; out AStart, AEnd: TColor);
+    procedure TimerUpdateTimer(Sender: TObject);
   public
     procedure LoadWorkspacesAndBoards;
   end;
@@ -65,6 +71,12 @@ begin
     if LoginForm.ShowModal = mrOk then
     begin
       LoadWorkspacesAndBoards;
+      
+      // Initialize dynamic auto-reload timer (60 seconds interval)
+      FTimerUpdate := TTimer.Create(Self);
+      FTimerUpdate.Interval := 60000;
+      FTimerUpdate.OnTimer := @TimerUpdateTimer;
+      FTimerUpdate.Enabled := True;
     end
     else
     begin
@@ -222,15 +234,27 @@ var
   BTitle, BBackground, BPass: string;
   NewCard: TBoardCard;
   CardColor, EndColor: TColor;
+  SavedScrollY: Integer;
+  HasControlsToFree: Boolean;
 begin
+  SavedScrollY := ScrollBox1.VertScrollBar.Position;
   ScrollBox1.DisableAlign;
   try
-    // Clear any existing workspace components from ScrollBox1 (e.g. design-time placeholders)
-    for I := ScrollBox1.ControlCount - 1 downto 0 do
+    // Safely clear any existing workspace components from ScrollBox1 (using a re-evaluating loop)
+    HasControlsToFree := True;
+    while HasControlsToFree do
     begin
-      Ctrl := ScrollBox1.Controls[I];
-      if (Ctrl is TPanelAreaTrabalho) or (Ctrl is TScrollBoardCards) then
-        Ctrl.Free;
+      HasControlsToFree := False;
+      for I := 0 to ScrollBox1.ControlCount - 1 do
+      begin
+        Ctrl := ScrollBox1.Controls[I];
+        if (Ctrl is TPanelAreaTrabalho) or (Ctrl is TScrollBoardCards) then
+        begin
+          Ctrl.Free;
+          HasControlsToFree := True;
+          Break;
+        end;
+      end;
     end;
 
     if LoggedUserID = 0 then 
@@ -239,8 +263,11 @@ begin
     try
       if not DataModule1.IBDatabase1.Connected then
         DataModule1.IBDatabase1.Connected := True;
-      if not DataModule1.IBTransaction1.Active then
-        DataModule1.IBTransaction1.StartTransaction;
+        
+      // Cycle transaction to get a fresh snapshot of the database
+      if DataModule1.IBTransaction1.Active then
+        DataModule1.IBTransaction1.Commit;
+      DataModule1.IBTransaction1.StartTransaction;
     except
       on E: Exception do
       begin
@@ -319,6 +346,22 @@ begin
     end;
   finally
     ScrollBox1.EnableAlign;
+    ScrollBox1.VertScrollBar.Position := SavedScrollY;
+  end;
+end;
+
+procedure TForm1.TimerUpdateTimer(Sender: TObject);
+begin
+  // Do not auto-reload if the main form is not the currently active form
+  if (Screen = nil) or (Screen.ActiveForm <> Self) then
+    Exit;
+    
+  FTimerUpdate.Enabled := False;
+  try
+    LoadWorkspacesAndBoards;
+  finally
+    if FTimerUpdate <> nil then
+      FTimerUpdate.Enabled := True;
   end;
 end;
 
