@@ -47,7 +47,7 @@ var
 implementation
 
 uses
-  uListas, uLogin, udm, db;
+  uListas, uLogin, udm, db, IBQuery;
 
 {$R *.lfm}
 
@@ -279,6 +279,7 @@ begin
           LastHeader := TPanelAreaTrabalho.Create(Self);
           LastHeader.Parent := ScrollBox1;
           LastHeader.Align := alTop;
+          LastHeader.WorkspaceID := WID;
           LastHeader.WorkspaceName := WName;
           LastHeader.LinkedControl := LastCardsContainer;
           LastHeader.OnCreateBoard := @WorkspacePanelCreateBoard;
@@ -294,6 +295,7 @@ begin
 
           NewCard := TBoardCard.Create(Self);
           NewCard.Parent := LastCardsContainer;
+          NewCard.BoardID := DataModule1.IBQ_WorksSpace_E_Boards.FieldByName('BOARD_ID').AsInteger;
           NewCard.BoardTitle := BTitle;
           NewCard.Password := BPass;
           
@@ -330,11 +332,46 @@ var
   WorkspaceName: string;
   NewHeader: TPanelAreaTrabalho;
   NewCards: TScrollBoardCards;
+  Q: TIBQuery;
+  NewWID: Integer;
 begin
   WorkspaceName := '';
   if InputQuery('Nova Área de Trabalho', 'Digite o nome da área de trabalho:', WorkspaceName) then
   begin
     if Trim(WorkspaceName) = '' then Exit;
+
+    if LoggedUserID = 0 then
+    begin
+      ShowMessage('Erro: Nenhum usuário logado.');
+      Exit;
+    end;
+
+    Q := TIBQuery.Create(nil);
+    try
+      Q.Database := DataModule1.IBDatabase1;
+      Q.Transaction := DataModule1.IBTransaction1;
+      Q.SQL.Text := 'INSERT INTO "Workspace" (NAME, OWNERID) VALUES (:NAME, :OWNERID) RETURNING ID';
+      Q.ParamByName('NAME').AsString := WorkspaceName;
+      Q.ParamByName('OWNERID').AsInteger := LoggedUserID;
+      Q.Open;
+      NewWID := Q.Fields[0].AsInteger;
+      Q.Close;
+
+      Q.SQL.Text := 'INSERT INTO "WorkspaceMember" (USERID, WORKSPACEID, "ROLE") VALUES (:USERID, :WORKSPACEID, ''OWNER'')';
+      Q.ParamByName('USERID').AsInteger := LoggedUserID;
+      Q.ParamByName('WORKSPACEID').AsInteger := NewWID;
+      Q.ExecSQL;
+
+      DataModule1.IBTransaction1.CommitRetaining;
+    except
+      on E: Exception do
+      begin
+        Q.Free;
+        ShowMessage('Erro ao criar área de trabalho no banco de dados: ' + E.Message);
+        Exit;
+      end;
+    end;
+    Q.Free;
     
     // Create ScrollBoardCards container first
     NewCards := TScrollBoardCards.Create(Self);
@@ -347,6 +384,7 @@ begin
     NewHeader := TPanelAreaTrabalho.Create(Self);
     NewHeader.Parent := ScrollBox1;
     NewHeader.Align := alTop;
+    NewHeader.WorkspaceID := NewWID;
     NewHeader.WorkspaceName := WorkspaceName;
     NewHeader.LinkedControl := NewCards;
     NewHeader.OnCreateBoard := @WorkspacePanelCreateBoard;
@@ -384,6 +422,8 @@ var
   CardsContainer: TScrollBoardCards;
   NewCard: TBoardCard;
   BoardTitle: string;
+  Q: TIBQuery;
+  NewBID: Integer;
 begin
   Workspace := TPanelAreaTrabalho(Sender);
   if (Workspace.LinkedControl <> nil) and (Workspace.LinkedControl is TScrollBoardCards) then
@@ -393,9 +433,43 @@ begin
     if InputQuery('Novo Quadro', 'Digite o título do Quadro:', BoardTitle) then
     begin
       if Trim(BoardTitle) = '' then Exit;
+
+      if LoggedUserID = 0 then
+      begin
+        ShowMessage('Erro: Nenhum usuário logado.');
+        Exit;
+      end;
+
+      Q := TIBQuery.Create(nil);
+      try
+        Q.Database := DataModule1.IBDatabase1;
+        Q.Transaction := DataModule1.IBTransaction1;
+        Q.SQL.Text := 'INSERT INTO "Board" (TITLE, BACKGROUND, WORKSPACEID, OWNERID, ISPUBLIC) ' +
+                      'VALUES (:TITLE, :BG, :WORKSPACEID, :OWNERID, TRUE) RETURNING ID';
+        Q.ParamByName('TITLE').AsString := BoardTitle;
+        Q.ParamByName('BG').AsString := 'hsl(200, 70%, 60%)'; // default pastel color
+        Q.ParamByName('WORKSPACEID').AsInteger := Workspace.WorkspaceID;
+        Q.ParamByName('OWNERID').AsInteger := LoggedUserID;
+        Q.Open;
+        NewBID := Q.Fields[0].AsInteger;
+        Q.Close;
+        DataModule1.IBTransaction1.CommitRetaining;
+      except
+        on E: Exception do
+        begin
+          Q.Free;
+          ShowMessage('Erro ao criar quadro no banco de dados: ' + E.Message);
+          Exit;
+        end;
+      end;
+      Q.Free;
+
       NewCard := TBoardCard.Create(Self);
       NewCard.Parent := CardsContainer;
+      NewCard.BoardID := NewBID;
       NewCard.BoardTitle := BoardTitle;
+      NewCard.StartColor := $C87A3B; // Default BGR start color
+      NewCard.EndColor := $281E19;   // Default BGR end color
       NewCard.OnEdit := @BoardCardEdit;
       NewCard.OnSettings := @BoardCardSettings;
       NewCard.OnDelete := @BoardCardDelete;
@@ -407,20 +481,97 @@ begin
 end;
 
 procedure TForm1.WorkspacePanelDelete(Sender: TObject);
+var
+  Q: TIBQuery;
+  WID: Integer;
 begin
-  // Custom delete hook
+  if not (Sender is TPanelAreaTrabalho) then Exit;
+  WID := TPanelAreaTrabalho(Sender).WorkspaceID;
+  if WID = 0 then Exit;
+  
+  Q := TIBQuery.Create(nil);
+  try
+    Q.Database := DataModule1.IBDatabase1;
+    Q.Transaction := DataModule1.IBTransaction1;
+    
+    // Delete boards of this workspace
+    Q.SQL.Text := 'DELETE FROM "Board" WHERE WORKSPACEID = :WID';
+    Q.ParamByName('WID').AsInteger := WID;
+    Q.ExecSQL;
+    
+    // Delete members of this workspace
+    Q.SQL.Text := 'DELETE FROM "WorkspaceMember" WHERE WORKSPACEID = :WID';
+    Q.ParamByName('WID').AsInteger := WID;
+    Q.ExecSQL;
+    
+    // Delete the workspace itself
+    Q.SQL.Text := 'DELETE FROM "Workspace" WHERE ID = :ID';
+    Q.ParamByName('ID').AsInteger := WID;
+    Q.ExecSQL;
+    
+    DataModule1.IBTransaction1.CommitRetaining;
+  finally
+    Q.Free;
+  end;
 end;
 
 procedure TForm1.BoardCardEdit(Sender: TObject);
+var
+  Q: TIBQuery;
 begin
+  if not (Sender is TBoardCard) then Exit;
+  Q := TIBQuery.Create(nil);
+  try
+    Q.Database := DataModule1.IBDatabase1;
+    Q.Transaction := DataModule1.IBTransaction1;
+    Q.SQL.Text := 'UPDATE "Board" SET TITLE = :TITLE WHERE ID = :ID';
+    Q.ParamByName('TITLE').AsString := TBoardCard(Sender).BoardTitle;
+    Q.ParamByName('ID').AsInteger := TBoardCard(Sender).BoardID;
+    Q.ExecSQL;
+    DataModule1.IBTransaction1.CommitRetaining;
+  finally
+    Q.Free;
+  end;
 end;
 
 procedure TForm1.BoardCardSettings(Sender: TObject);
+var
+  Q: TIBQuery;
 begin
+  if not (Sender is TBoardCard) then Exit;
+  Q := TIBQuery.Create(nil);
+  try
+    Q.Database := DataModule1.IBDatabase1;
+    Q.Transaction := DataModule1.IBTransaction1;
+    Q.SQL.Text := 'UPDATE "Board" SET "PASSWORD" = :PASS WHERE ID = :ID';
+    if TBoardCard(Sender).Password = '' then
+      Q.ParamByName('PASS').Clear
+    else
+      Q.ParamByName('PASS').AsString := TBoardCard(Sender).Password;
+    Q.ParamByName('ID').AsInteger := TBoardCard(Sender).BoardID;
+    Q.ExecSQL;
+    DataModule1.IBTransaction1.CommitRetaining;
+  finally
+    Q.Free;
+  end;
 end;
 
 procedure TForm1.BoardCardDelete(Sender: TObject);
+var
+  Q: TIBQuery;
 begin
+  if not (Sender is TBoardCard) then Exit;
+  Q := TIBQuery.Create(nil);
+  try
+    Q.Database := DataModule1.IBDatabase1;
+    Q.Transaction := DataModule1.IBTransaction1;
+    Q.SQL.Text := 'DELETE FROM "Board" WHERE ID = :ID';
+    Q.ParamByName('ID').AsInteger := TBoardCard(Sender).BoardID;
+    Q.ExecSQL;
+    DataModule1.IBTransaction1.CommitRetaining;
+  finally
+    Q.Free;
+  end;
 end;
 
 procedure TForm1.BoardCardClick(Sender: TObject);

@@ -11,6 +11,7 @@ uses
 type
   TBoardCard = class(TCustomControl)
   private
+    FBoardID: Integer;
     FBoardTitle: string;
     FStartColor: TColor;
     FEndColor: TColor;
@@ -49,6 +50,7 @@ type
     constructor Create(AOwner: TComponent); override;
     
   published
+    property BoardID: Integer read FBoardID write FBoardID;
     property BoardTitle: string read FBoardTitle write SetBoardTitle;
     property StartColor: TColor read FStartColor write SetStartColor default $D87A3B; // Vibrant Blue (BGR)
     property EndColor: TColor read FEndColor write SetEndColor default $35261D;   // Dark Navy/Slate (BGR)
@@ -90,6 +92,7 @@ constructor TBoardCard.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   
+  FBoardID := 0;
   Width := 300;
   Height := 120;
   DoubleBuffered := True;

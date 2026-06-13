@@ -11,6 +11,7 @@ uses
 type
   TPanelAreaTrabalho = class(TCustomControl)
   private
+    FWorkspaceID: Integer;
     FWorkspaceName: string;
     FBadgeText: string;
     FStartColor: TColor;
@@ -45,6 +46,7 @@ type
     destructor Destroy; override;
     
   published
+    property WorkspaceID: Integer read FWorkspaceID write FWorkspaceID;
     property WorkspaceName: string read FWorkspaceName write SetWorkspaceName;
     property BadgeText: string read FBadgeText write SetBadgeText;
     property StartColor: TColor read FStartColor write SetStartColor default $15110B; // BGR Dark Blue/Grey
@@ -79,6 +81,7 @@ constructor TPanelAreaTrabalho.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   
+  FWorkspaceID := 0;
   Height := 50;
   Width := 800;
   DoubleBuffered := True;
