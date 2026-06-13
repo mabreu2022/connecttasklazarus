@@ -18,6 +18,12 @@ type
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
+    Panel1: TPanel;
+    BitBtn1: TBitBtn;
+    Edit1: TEdit;
+    BitBtn2: TBitBtn;
+    BitBtn3: TPanel;
+    BitBtn4: TBitBtn;
     ScrollBox1: TScrollBox;
     StatusBar1: TStatusBar;
     procedure BoardCard1Click(Sender: TObject);
@@ -37,6 +43,7 @@ type
     FTimerUpdate: TTimer;
     procedure ParseBoardColors(AColorStr: string; out AStart, AEnd: TColor);
     procedure TimerUpdateTimer(Sender: TObject);
+    procedure ReloadWorkspacesAsync(Data: PtrInt);
   public
     procedure LoadWorkspacesAndBoards;
   end;
@@ -53,6 +60,7 @@ uses
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  Panel1.BringToFront;
 end;
 
 procedure TForm1.FormShow(Sender: TObject);
@@ -367,8 +375,6 @@ end;
 procedure TForm1.BitBtn3Click(Sender: TObject);
 var
   WorkspaceName: string;
-  NewHeader: TPanelAreaTrabalho;
-  NewCards: TScrollBoardCards;
   Q: TIBQuery;
   NewWID: Integer;
 begin
@@ -421,23 +427,7 @@ begin
     end;
     Q.Free;
     
-    // Create ScrollBoardCards container first
-    NewCards := TScrollBoardCards.Create(Self);
-    NewCards.Parent := ScrollBox1;
-    NewCards.Align := alTop;
-    NewCards.Height := 140; // Height of 1 row of cards + margins
-    NewCards.SendToBack;    // Move to bottom visual position
-    
-    // Create Workspace Header Panel
-    NewHeader := TPanelAreaTrabalho.Create(Self);
-    NewHeader.Parent := ScrollBox1;
-    NewHeader.Align := alTop;
-    NewHeader.WorkspaceID := NewWID;
-    NewHeader.WorkspaceName := WorkspaceName;
-    NewHeader.LinkedControl := NewCards;
-    NewHeader.OnCreateBoard := @WorkspacePanelCreateBoard;
-    NewHeader.OnDelete := @WorkspacePanelDelete;
-    NewHeader.SendToBack;   // Move to bottom visual position (above NewCards)
+    Application.QueueAsyncCall(@ReloadWorkspacesAsync, 0);
   end;
 end;
 
@@ -467,15 +457,10 @@ end;
 procedure TForm1.WorkspacePanelCreateBoard(Sender: TObject);
 var
   Workspace: TPanelAreaTrabalho;
-  NewCard: TBoardCard;
   Q: TIBQuery;
   NewBID: Integer;
   NewBoardForm: TFormNewBoard;
   FinalWorkspaceID: Integer;
-  FinalWorkspaceHeader: TPanelAreaTrabalho;
-  FinalCardsContainer: TScrollBoardCards;
-  I: Integer;
-  Ctrl: TControl;
 begin
   Workspace := TPanelAreaTrabalho(Sender);
   
@@ -531,36 +516,7 @@ begin
       end;
       Q.Free;
 
-      // Find the visual container corresponding to the selected workspace
-      FinalWorkspaceHeader := nil;
-      FinalCardsContainer := nil;
-      for I := 0 to ScrollBox1.ControlCount - 1 do
-      begin
-        Ctrl := ScrollBox1.Controls[I];
-        if (Ctrl is TPanelAreaTrabalho) and (TPanelAreaTrabalho(Ctrl).WorkspaceID = FinalWorkspaceID) then
-        begin
-          FinalWorkspaceHeader := TPanelAreaTrabalho(Ctrl);
-          if (FinalWorkspaceHeader.LinkedControl <> nil) and (FinalWorkspaceHeader.LinkedControl is TScrollBoardCards) then
-            FinalCardsContainer := TScrollBoardCards(FinalWorkspaceHeader.LinkedControl);
-          Break;
-        end;
-      end;
-
-      // If we found the target container, add the card to it
-      if FinalCardsContainer <> nil then
-      begin
-        NewCard := TBoardCard.Create(Self);
-        NewCard.Parent := FinalCardsContainer;
-        NewCard.BoardID := NewBID;
-        NewCard.BoardTitle := NewBoardForm.BoardTitleText;
-        NewCard.StartColor := $C87A3B; // Default BGR start color
-        NewCard.EndColor := $281E19;   // Default BGR end color
-        NewCard.OnEdit := @BoardCardEdit;
-        NewCard.OnSettings := @BoardCardSettings;
-        NewCard.OnDelete := @BoardCardDelete;
-        NewCard.OnClick := @BoardCardClick;
-        FinalCardsContainer.Invalidate;
-      end;
+      Application.QueueAsyncCall(@ReloadWorkspacesAsync, 0);
     end;
   finally
     NewBoardForm.Free;
@@ -603,6 +559,7 @@ begin
   finally
     Q.Free;
   end;
+  Application.QueueAsyncCall(@ReloadWorkspacesAsync, 0);
 end;
 
 procedure TForm1.BoardCardEdit(Sender: TObject);
@@ -667,6 +624,7 @@ begin
   finally
     Q.Free;
   end;
+  Application.QueueAsyncCall(@ReloadWorkspacesAsync, 0);
 end;
 
 procedure TForm1.BoardCardClick(Sender: TObject);
@@ -675,6 +633,11 @@ begin
     Application.CreateForm(TForm2, Form2);
   Form2.Caption := TBoardCard(Sender).BoardTitle;
   Form2.Show;
+end;
+
+procedure TForm1.ReloadWorkspacesAsync(Data: PtrInt);
+begin
+  LoadWorkspacesAndBoards;
 end;
 
 end.

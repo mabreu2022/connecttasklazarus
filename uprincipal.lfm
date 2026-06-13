@@ -12,22 +12,110 @@ object Form1: TForm1
   WindowState = wsMaximized
   OnCreate = FormCreate
   OnShow = FormShow
+  object Panel1: TPanel
+    Left = 0
+    Height = 50
+    Top = 0
+    Width = 1126
+    Align = alTop
+    Alignment = taLeftJustify
+    BevelOuter = bvNone
+    Caption = '  ConnectTask'
+    ClientHeight = 50
+    ClientWidth = 1126
+    Color = 1316367
+    Font.Color = clWhite
+    Font.Height = -16
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    ParentBackground = False
+    ParentColor = False
+    ParentFont = False
+    TabOrder = 0
+    object BitBtn1: TBitBtn
+      Left = 632
+      Height = 30
+      Top = 8
+      Width = 75
+      Caption = 'Menu'
+      TabOrder = 0
+      Visible = False
+    end
+    object Edit1: TEdit
+      Left = 180
+      Height = 23
+      Top = 11
+      Width = 250
+      Color = 2433570
+      Font.Color = clWhite
+      Font.Name = 'Segoe UI'
+      ParentFont = False
+      TabOrder = 1
+      Visible = False
+    end
+    object BitBtn2: TBitBtn
+      Left = 440
+      Height = 30
+      Top = 10
+      Width = 75
+      Caption = 'Pesquisar'
+      TabOrder = 2
+      Visible = False
+    end
+    object BitBtn3: TPanel
+      Left = 958
+      Height = 34
+      Top = 8
+      Width = 152
+      Align = alRight
+      BevelOuter = bvNone
+      BorderSpacing.Left = 10
+      BorderSpacing.Top = 8
+      BorderSpacing.Right = 16
+      BorderSpacing.Bottom = 8
+      Caption = '+ Novo Workspace'
+      Color = 15025743
+      Cursor = crHandPoint
+      Font.Color = clWhite
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentBackground = False
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 3
+      OnClick = BitBtn3Click
+    end
+    object BitBtn4: TBitBtn
+      Left = 828
+      Height = 34
+      Top = 8
+      Width = 120
+      Align = alRight
+      BorderSpacing.Top = 8
+      BorderSpacing.Right = 10
+      BorderSpacing.Bottom = 8
+      Caption = 'Novo Quadro'
+      TabOrder = 4
+      Visible = False
+      OnClick = BitBtn4Click
+    end
+  end
+  object ScrollBox1: TScrollBox
+    Left = 0
+    Height = 525
+    Top = 50
+    Width = 1126
+    HorzScrollBar.Page = 1
+    VertScrollBar.Page = 1
+    Align = alClient
+    TabOrder = 1
+  end
   object StatusBar1: TStatusBar
     Left = 0
     Height = 23
     Top = 575
     Width = 1126
     Panels = <>
-  end
-  object ScrollBox1: TScrollBox
-    Left = 0
-    Height = 575
-    Top = 0
-    Width = 1126
-    HorzScrollBar.Page = 1
-    VertScrollBar.Page = 1
-    Align = alClient
-    TabOrder = 1
   end
   object MainMenu1: TMainMenu
     Left = 48

@@ -192,7 +192,6 @@ begin
   ) = mrYes then
   begin
     if Assigned(FOnDelete) then FOnDelete(Self);
-    Application.QueueAsyncCall(@DeferredFree, 0);
   end;
 end;
 

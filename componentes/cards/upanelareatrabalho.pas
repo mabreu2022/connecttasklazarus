@@ -172,16 +172,6 @@ begin
   ) = mrYes then
   begin
     if Assigned(FOnDelete) then FOnDelete(Self);
-    
-    // Automatically frees the linked TScrollBoardCards
-    if FLinkedControl <> nil then
-    begin
-      FLinkedControl.Free;
-      FLinkedControl := nil;
-    end;
-    
-    // Safely free self
-    Free;
   end;
 end;
 
