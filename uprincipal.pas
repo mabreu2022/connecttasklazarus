@@ -14,16 +14,10 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    BitBtn1: TBitBtn;
-    BitBtn2: TBitBtn;
-    BitBtn3: TBitBtn;
-    BitBtn4: TBitBtn;
-    Edit1: TEdit;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     MenuItem2: TMenuItem;
     MenuItem3: TMenuItem;
-    Panel1: TPanel;
     ScrollBox1: TScrollBox;
     StatusBar1: TStatusBar;
     procedure BoardCard1Click(Sender: TObject);
