@@ -35,6 +35,7 @@ type
     procedure DoEdit;
     procedure DoSettings;
     procedure DoDelete;
+    procedure DeferredFree(Data: PtrInt);
     
   protected
     procedure Paint; override;
@@ -172,6 +173,11 @@ begin
   if Assigned(FOnSettings) then FOnSettings(Self);
 end;
 
+procedure TBoardCard.DeferredFree(Data: PtrInt);
+begin
+  Self.Free;
+end;
+
 procedure TBoardCard.DoDelete;
 begin
   if MessageDlg(
@@ -183,7 +189,7 @@ begin
   ) = mrYes then
   begin
     if Assigned(FOnDelete) then FOnDelete(Self);
-    Free;
+    Application.QueueAsyncCall(@DeferredFree, 0);
   end;
 end;
 
@@ -352,12 +358,25 @@ begin
 end;
 
 procedure TBoardCard.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  ClickedButton: Integer;
+  I: Integer;
 begin
   inherited MouseDown(Button, Shift, X, Y);
   
   if Button = mbLeft then
   begin
-    case FHoveredButton of
+    ClickedButton := 0;
+    for I := 1 to 3 do
+    begin
+      if PtInRect(GetButtonRect(I), Point(X, Y)) then
+      begin
+        ClickedButton := I;
+        Break;
+      end;
+    end;
+
+    case ClickedButton of
       1: DoEdit;
       2: DoSettings;
       3: DoDelete;

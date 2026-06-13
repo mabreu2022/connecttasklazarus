@@ -16,6 +16,7 @@ type
     IBQ_Workspace: TIBQuery;
     IBQ_workspacepoidusuairo: TIBQuery;
     IBQ_WorksSpace_E_Boards: TIBQuery;
+    IBQ_Login: TIBQuery;
   private
 
   public

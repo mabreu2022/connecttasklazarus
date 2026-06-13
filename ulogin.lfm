@@ -1,8 +1,163 @@
 object Form3: TForm3
-  Left = 350
-  Height = 406
+  Left = 450
+  Height = 440
   Top = 250
-  Width = 415
-  Caption = 'Form3'
+  Width = 460
+  BorderStyle = bsDialog
+  Caption = 'Login'
+  ClientHeight = 440
+  ClientWidth = 460
+  Color = $0E0C0B
+  Position = poScreenCenter
   LCLVersion = '4.8.0.0'
+  object pnlCard: TPanel
+    Left = 30
+    Height = 380
+    Top = 30
+    Width = 400
+    Align = alClient
+    BorderSpacing.Around = 30
+    BevelOuter = bvNone
+    Color = $181311
+    ParentBackground = False
+    ParentColor = False
+    TabOrder = 0
+    object lblTitle: TLabel
+      Left = 0
+      Height = 25
+      Top = 30
+      Width = 400
+      Align = alTop
+      Alignment = taCenter
+      Caption = 'Login to Connect Task'
+      Font.Color = clWhite
+      Font.Height = -19
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object pnlEmail: TPanel
+      Left = 30
+      Height = 44
+      Top = 90
+      Width = 340
+      BevelOuter = bvNone
+      Color = $2A221F
+      ParentBackground = False
+      ParentColor = False
+      TabOrder = 0
+      object edtEmail: TEdit
+        Left = 12
+        Height = 22
+        Top = 11
+        Width = 316
+        Align = alClient
+        BorderSpacing.Left = 12
+        BorderSpacing.Top = 11
+        BorderSpacing.Right = 12
+        BorderSpacing.Bottom = 11
+        BorderStyle = bsNone
+        Color = $2A221F
+        Font.Color = clWhite
+        Font.Height = -13
+        Font.Name = 'Segoe UI'
+        ParentFont = False
+        TextHint = 'Email'
+      end
+    end
+    object pnlPassword: TPanel
+      Left = 30
+      Height = 44
+      Top = 150
+      Width = 340
+      BevelOuter = bvNone
+      Color = $2A221F
+      ParentBackground = False
+      ParentColor = False
+      TabOrder = 1
+      object edtPassword: TEdit
+        Left = 12
+        Height = 22
+        Top = 11
+        Width = 316
+        Align = alClient
+        BorderSpacing.Left = 12
+        BorderSpacing.Top = 11
+        BorderSpacing.Right = 12
+        BorderSpacing.Bottom = 11
+        BorderStyle = bsNone
+        Color = $2A221F
+        Font.Color = clWhite
+        Font.Height = -13
+        Font.Name = 'Segoe UI'
+        ParentFont = False
+        PasswordChar = '*'
+        TextHint = 'Password'
+      end
+    end
+    object lblForgot: TLabel
+      Left = 30
+      Height = 15
+      Top = 206
+      Width = 340
+      Alignment = taRightJustify
+      AutoSize = False
+      Caption = 'Esqueci minha senha'
+      Cursor = crHandPoint
+      Font.Color = $E5464F
+      Font.Height = -11
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsUnderline]
+      ParentColor = False
+      ParentFont = False
+    end
+    object btnLogin: TPanel
+      Left = 30
+      Height = 44
+      Top = 246
+      Width = 340
+      BevelOuter = bvNone
+      Color = $E5464F
+      Cursor = crHandPoint
+      ParentBackground = False
+      ParentColor = False
+      TabOrder = 2
+      OnClick = btnLoginClick
+      object lblLogin: TLabel
+        Left = 0
+        Height = 44
+        Top = 0
+        Width = 340
+        Align = alClient
+        Alignment = taCenter
+        Caption = 'Login'
+        FocusControl = btnLogin
+        Font.Color = clWhite
+        Font.Height = -15
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        Layout = tlCenter
+        ParentColor = False
+        ParentFont = False
+        OnClick = btnLoginClick
+      end
+    end
+    object lblRegister: TLabel
+      Left = 0
+      Height = 15
+      Top = 335
+      Width = 400
+      Align = alBottom
+      Alignment = taCenter
+      Caption = 'Don''t have an account? Register'
+      Cursor = crHandPoint
+      Font.Color = clWhite
+      Font.Height = -12
+      Font.Name = 'Segoe UI'
+      ParentColor = False
+      ParentFont = False
+      OnClick = lblRegisterClick
+    end
+  end
 end

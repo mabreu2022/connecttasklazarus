@@ -16,23 +16,23 @@ type
     FTaskDate: string;
     FUserName: string;
     FUserColor: TColor;
-    
+
     FBackgroundColor: TColor;
     FBorderColor: TColor;
     FTextColor: TColor;
     FDateColor: TColor;
     FCodeColor: TColor;
-    
+
     // Hover states for drawing
-    FHoveredButton: Integer; // 0 = none, 1 = copy, 2 = edit, 3 = delete
-    FIsHovered: Boolean;
-    FIsDragTarget: Boolean;
-    
+    FHoveredButton: integer; // 0 = none, 1 = copy, 2 = edit, 3 = delete
+    FIsHovered: boolean;
+    FIsDragTarget: boolean;
+
     // Events
-    FOnCopy: TNotifyEvent;
-    FOnEdit: TNotifyEvent;
-    FOnDelete: TNotifyEvent;
-    
+    FOnCopyClick: TNotifyEvent;
+    FOnEditClick: TNotifyEvent;
+    FOnDeleteClick: TNotifyEvent;
+
     procedure SetTaskCode(AValue: string);
     procedure SetTaskText(AValue: string);
     procedure SetTaskDate(AValue: string);
@@ -43,44 +43,52 @@ type
     procedure SetTextColor(AValue: TColor);
     procedure SetDateColor(AValue: TColor);
     procedure SetCodeColor(AValue: TColor);
-    
-    function GetButtonRect(Index: Integer): TRect;
+
+    function GetButtonRect(Index: integer): TRect;
     function GetAvatarRect: TRect;
 
     // Built-in default actions
     procedure DoCopy;
     procedure DoEdit;
     procedure DoDelete;
-    
+    procedure DeferredFree(Data: PtrInt);
+
   protected
     procedure Paint; override;
-    procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
-    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
+    procedure MouseMove(Shift: TShiftState; X, Y: integer); override;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState;
+      X, Y: integer); override;
     procedure MouseLeave; override;
     procedure MouseEnter; override;
-    procedure DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean); override;
-    
+    procedure DragOver(Source: TObject; X, Y: integer; State: TDragState;
+      var Accept: boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure DragDrop(Source: TObject; X, Y: Integer); override;
-    
+    procedure DragDrop(Source: TObject; X, Y: integer); override;
+
   published
     property TaskCode: string read FTaskCode write SetTaskCode;
     property TaskText: string read FTaskText write SetTaskText;
     property TaskDate: string read FTaskDate write SetTaskDate;
     property UserName: string read FUserName write SetUserName;
-    property UserColor: TColor read FUserColor write SetUserColor default $E5464F; // Premium Violet/Indigo
-    
-    property BackgroundColor: TColor read FBackgroundColor write SetBackgroundColor default $0C0C0C; // Modern zinc-950
-    property BorderColor: TColor read FBorderColor write SetBorderColor default $27272A; // zinc-800
-    property TextColor: TColor read FTextColor write SetTextColor default $FAFAFA; // zinc-50
-    property DateColor: TColor read FDateColor write SetDateColor default $71717A; // zinc-500
-    property CodeColor: TColor read FCodeColor write SetCodeColor default $A1A1AA; // zinc-400
-    
-    property OnCopy: TNotifyEvent read FOnCopy write FOnCopy;
-    property OnEdit: TNotifyEvent read FOnEdit write FOnEdit;
-    property OnDelete: TNotifyEvent read FOnDelete write FOnDelete;
-    
+    property UserColor: TColor read FUserColor write SetUserColor default $E5464F;
+    // Premium Violet/Indigo
+
+    property BackgroundColor: TColor read FBackgroundColor
+      write SetBackgroundColor default $0C0C0C; // Modern zinc-950
+    property BorderColor: TColor read FBorderColor write SetBorderColor default $27272A;
+    // zinc-800
+    property TextColor: TColor read FTextColor write SetTextColor default $FAFAFA;
+    // zinc-50
+    property DateColor: TColor read FDateColor write SetDateColor default $71717A;
+    // zinc-500
+    property CodeColor: TColor read FCodeColor write SetCodeColor default $A1A1AA;
+    // zinc-400
+
+    property OnCopyClick: TNotifyEvent read FOnCopyClick write FOnCopyClick;
+    property OnEditClick: TNotifyEvent read FOnEditClick write FOnEditClick;
+    property OnDeleteClick: TNotifyEvent read FOnDeleteClick write FOnDeleteClick;
+
     // Re-expose standard properties
     property Align;
     property Anchors;
@@ -91,7 +99,7 @@ type
     property Visible;
     property OnClick;
     property OnDblClick;
-    
+
     // Drag properties
     property DragCursor;
     property DragMode;
@@ -117,24 +125,24 @@ end;
 constructor TTaskCard.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  
+
   // Default sizes and options
   Width := 280;
   Height := 240;
   DoubleBuffered := True;
-  
+
   FTaskCode := '#6F4895';
-  FTaskText := 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5';
+  FTaskText := 'quando movemos uma tarefa para outra';
   FTaskDate := '22/01/2026';
   FUserName := 'mauricio abreu';
   FUserColor := $E5464F; // Blue-violet color for badge
-  
+
   FBackgroundColor := $0C0C0C; // Very dark grey (almost black)
   FBorderColor := $27272A;     // Zinc 800 subtle border
   FTextColor := $FAFAFA;       // Soft white
   FDateColor := $71717A;       // Muted gray
   FCodeColor := $A1A1AA;       // Lighter gray for task code
-  
+
   FHoveredButton := 0;
   FIsHovered := False;
 end;
@@ -229,9 +237,9 @@ begin
   end;
 end;
 
-function TTaskCard.GetButtonRect(Index: Integer): TRect;
+function TTaskCard.GetButtonRect(Index: integer): TRect;
 var
-  RightOffset: Integer;
+  RightOffset: integer;
 begin
   // Index: 1 = Copy, 2 = Edit, 3 = Delete (from right to left)
   RightOffset := 16 + (3 - Index) * 28;
@@ -240,8 +248,8 @@ end;
 
 function TTaskCard.GetAvatarRect: TRect;
 var
-  BadgeWidth, BadgeHeight: Integer;
-  TextW: Integer;
+  BadgeWidth, BadgeHeight: integer;
+  TextW: integer;
 begin
   Canvas.Font.Name := 'Segoe UI';
   Canvas.Font.Size := 9;
@@ -249,7 +257,8 @@ begin
   TextW := Canvas.TextWidth(FUserName);
 
   BadgeHeight := 28;
-  BadgeWidth := 10 + 20 + 8 + TextW + 12; // padding left + circle + spacing + text + padding right
+  BadgeWidth := 10 + 20 + 8 + TextW + 12;
+  // padding left + circle + spacing + text + padding right
 
   Result := Rect(16, Height - 16 - BadgeHeight, 16 + BadgeWidth, Height - 16);
 end;
@@ -277,11 +286,9 @@ begin
   begin
     Canvas.Pen.Width := 1;
     if FIsHovered then
-      Canvas.Pen.Color := TColor(RGB(
-        Min(255, Red(FBorderColor) + 30),
-        Min(255, Green(FBorderColor) + 30),
-        Min(255, Blue(FBorderColor) + 30)
-      ))
+      Canvas.Pen.Color := TColor(RGB(Min(255, Red(FBorderColor) + 30),
+        Min(255, Green(FBorderColor) + 30), Min(255,
+        Blue(FBorderColor) + 30)))
     else
       Canvas.Pen.Color := FBorderColor;
   end;
@@ -316,14 +323,14 @@ begin
   Canvas.Brush.Style := bsClear;
   Canvas.Pen.Color := $AAAAAA;
   // Back page (top-right offset) - just 4 lines
-  Canvas.Line(BtnRect.Left + 9,  BtnRect.Top + 5,  BtnRect.Left + 16, BtnRect.Top + 5);
-  Canvas.Line(BtnRect.Left + 16, BtnRect.Top + 5,  BtnRect.Left + 16, BtnRect.Top + 14);
-  Canvas.Line(BtnRect.Left + 9,  BtnRect.Top + 5,  BtnRect.Left + 9,  BtnRect.Top + 8);
+  Canvas.Line(BtnRect.Left + 9, BtnRect.Top + 5, BtnRect.Left + 16, BtnRect.Top + 5);
+  Canvas.Line(BtnRect.Left + 16, BtnRect.Top + 5, BtnRect.Left + 16, BtnRect.Top + 14);
+  Canvas.Line(BtnRect.Left + 9, BtnRect.Top + 5, BtnRect.Left + 9, BtnRect.Top + 8);
   // Front page (bottom-left offset) - 4 lines
-  Canvas.Line(BtnRect.Left + 6,  BtnRect.Top + 8,  BtnRect.Left + 14, BtnRect.Top + 8);
-  Canvas.Line(BtnRect.Left + 14, BtnRect.Top + 8,  BtnRect.Left + 14, BtnRect.Top + 17);
-  Canvas.Line(BtnRect.Left + 14, BtnRect.Top + 17, BtnRect.Left + 6,  BtnRect.Top + 17);
-  Canvas.Line(BtnRect.Left + 6,  BtnRect.Top + 17, BtnRect.Left + 6,  BtnRect.Top + 8);
+  Canvas.Line(BtnRect.Left + 6, BtnRect.Top + 8, BtnRect.Left + 14, BtnRect.Top + 8);
+  Canvas.Line(BtnRect.Left + 14, BtnRect.Top + 8, BtnRect.Left + 14, BtnRect.Top + 17);
+  Canvas.Line(BtnRect.Left + 14, BtnRect.Top + 17, BtnRect.Left + 6, BtnRect.Top + 17);
+  Canvas.Line(BtnRect.Left + 6, BtnRect.Top + 17, BtnRect.Left + 6, BtnRect.Top + 8);
 
   // --- Button 2: Edit icon (pencil) ---
   BtnRect := GetButtonRect(2);
@@ -336,11 +343,13 @@ begin
   end;
   Canvas.Brush.Style := bsClear;
   Canvas.Pen.Color := $AAAAAA;
-  Canvas.Line(BtnRect.Left + 7,  BtnRect.Bottom - 6, BtnRect.Right - 7, BtnRect.Top + 6);
-  Canvas.Line(BtnRect.Left + 9,  BtnRect.Bottom - 6, BtnRect.Right - 5, BtnRect.Top + 6);
-  Canvas.Line(BtnRect.Left + 5,  BtnRect.Bottom - 5, BtnRect.Left + 7,  BtnRect.Bottom - 6);
-  Canvas.Line(BtnRect.Left + 5,  BtnRect.Bottom - 5, BtnRect.Left + 6,  BtnRect.Bottom - 3);
-  Canvas.Line(BtnRect.Right - 7, BtnRect.Top + 5,    BtnRect.Right - 5, BtnRect.Top + 7);
+  Canvas.Line(BtnRect.Left + 7, BtnRect.Bottom - 6, BtnRect.Right - 7, BtnRect.Top + 6);
+  Canvas.Line(BtnRect.Left + 9, BtnRect.Bottom - 6, BtnRect.Right - 5, BtnRect.Top + 6);
+  Canvas.Line(BtnRect.Left + 5, BtnRect.Bottom - 5, BtnRect.Left +
+    7, BtnRect.Bottom - 6);
+  Canvas.Line(BtnRect.Left + 5, BtnRect.Bottom - 5, BtnRect.Left +
+    6, BtnRect.Bottom - 3);
+  Canvas.Line(BtnRect.Right - 7, BtnRect.Top + 5, BtnRect.Right - 5, BtnRect.Top + 7);
 
   // --- Button 3: Delete icon (trash) ---
   BtnRect := GetButtonRect(3);
@@ -356,13 +365,24 @@ begin
     Canvas.Pen.Color := $4444FF
   else
     Canvas.Pen.Color := $AAAAAA;
-  Canvas.Line(BtnRect.Left + 9,  BtnRect.Top + 5,  BtnRect.Left + 13, BtnRect.Top + 5);  // handle
-  Canvas.Line(BtnRect.Left + 5,  BtnRect.Top + 7,  BtnRect.Right - 5, BtnRect.Top + 7);  // lid
-  Canvas.Line(BtnRect.Left + 7,  BtnRect.Top + 8,  BtnRect.Left + 7,  BtnRect.Bottom - 5); // left side
-  Canvas.Line(BtnRect.Right - 7, BtnRect.Top + 8,  BtnRect.Right - 7, BtnRect.Bottom - 5); // right side
-  Canvas.Line(BtnRect.Left + 7,  BtnRect.Bottom - 5, BtnRect.Right - 7, BtnRect.Bottom - 5); // bottom
-  Canvas.Line(BtnRect.Left + 10, BtnRect.Top + 9,  BtnRect.Left + 10, BtnRect.Bottom - 6); // inner line L
-  Canvas.Line(BtnRect.Right - 10,BtnRect.Top + 9,  BtnRect.Right - 10,BtnRect.Bottom - 6); // inner line R
+  Canvas.Line(BtnRect.Left + 9, BtnRect.Top + 5, BtnRect.Left + 13, BtnRect.Top + 5);
+  // handle
+  Canvas.Line(BtnRect.Left + 5, BtnRect.Top + 7, BtnRect.Right - 5, BtnRect.Top + 7);
+  // lid
+  Canvas.Line(BtnRect.Left + 7, BtnRect.Top + 8, BtnRect.Left + 7,
+    BtnRect.Bottom - 5);
+  // left side
+  Canvas.Line(BtnRect.Right - 7, BtnRect.Top + 8, BtnRect.Right -
+    7, BtnRect.Bottom - 5);
+  // right side
+  Canvas.Line(BtnRect.Left + 7, BtnRect.Bottom - 5, BtnRect.Right -
+    7, BtnRect.Bottom - 5); // bottom
+  Canvas.Line(BtnRect.Left + 10, BtnRect.Top + 9, BtnRect.Left + 10,
+    BtnRect.Bottom - 6);
+  // inner line L
+  Canvas.Line(BtnRect.Right - 10, BtnRect.Top + 9, BtnRect.Right -
+    10, BtnRect.Bottom - 6);
+  // inner line R
 
   // 4. Draw Task Description Text (Middle, wrapped)
   // Leave enough room: 72px from bottom for date(~12px) + gap(18px) + badge(28px) + margin(14px)
@@ -390,9 +410,11 @@ begin
   Canvas.Brush.Color := $EAEAEA;
   Canvas.Brush.Style := bsSolid;
   Canvas.Pen.Style := psClear;
-  Canvas.RoundRect(BadgeRect.Left, BadgeRect.Top, BadgeRect.Right, BadgeRect.Bottom, 8, 8);
+  Canvas.RoundRect(BadgeRect.Left, BadgeRect.Top, BadgeRect.Right,
+    BadgeRect.Bottom, 8, 8);
 
-  AvatarCircRect := Rect(BadgeRect.Left + 5, BadgeRect.Top + 4, BadgeRect.Left + 25, BadgeRect.Bottom - 4);
+  AvatarCircRect := Rect(BadgeRect.Left + 5, BadgeRect.Top + 4,
+    BadgeRect.Left + 25, BadgeRect.Bottom - 4);
   Canvas.Brush.Color := FUserColor;
   Canvas.Pen.Style := psClear;
   Canvas.Ellipse(AvatarCircRect);
@@ -407,10 +429,10 @@ begin
   else
     Letter := '?';
   Canvas.TextOut(
-    AvatarCircRect.Left + (AvatarCircRect.Width  - Canvas.TextWidth(Letter))  div 2,
-    AvatarCircRect.Top  + (AvatarCircRect.Height - Canvas.TextHeight(Letter)) div 2,
+    AvatarCircRect.Left + (AvatarCircRect.Width - Canvas.TextWidth(Letter)) div 2,
+    AvatarCircRect.Top + (AvatarCircRect.Height - Canvas.TextHeight(Letter)) div 2,
     Letter
-  );
+    );
 
   Canvas.Font.Color := $222222;
   Canvas.Font.Style := [fsBold];
@@ -418,19 +440,19 @@ begin
     BadgeRect.Left + 32,
     BadgeRect.Top + (BadgeRect.Height - Canvas.TextHeight(FUserName)) div 2,
     FUserName
-  );
+    );
 end;
 
-procedure TTaskCard.MouseMove(Shift: TShiftState; X, Y: Integer);
+procedure TTaskCard.MouseMove(Shift: TShiftState; X, Y: integer);
 var
-  I: Integer;
-  OldHovered: Integer;
+  I: integer;
+  OldHovered: integer;
 begin
   inherited MouseMove(Shift, X, Y);
-  
+
   OldHovered := FHoveredButton;
   FHoveredButton := 0;
-  
+
   for I := 1 to 3 do
   begin
     if PtInRect(GetButtonRect(I), Point(X, Y)) then
@@ -439,7 +461,7 @@ begin
       Break;
     end;
   end;
-  
+
   if FHoveredButton <> OldHovered then
   begin
     if FHoveredButton > 0 then
@@ -455,7 +477,7 @@ begin
   // Copy TaskCode to clipboard
   Clipboard.AsText := FTaskCode;
   // Fire the optional user event too
-  if Assigned(FOnCopy) then FOnCopy(Self);
+  if Assigned(FOnCopyClick) then FOnCopyClick(Self);
 end;
 
 procedure TTaskCard.DoEdit;
@@ -469,40 +491,53 @@ begin
     TaskText := NewText;  // uses the setter so it Invalidates
   end;
   // Fire the optional user event too
-  if Assigned(FOnEdit) then FOnEdit(Self);
+  if Assigned(FOnEditClick) then FOnEditClick(Self);
+end;
+
+procedure TTaskCard.DeferredFree(Data: PtrInt);
+begin
+  Self.Free;
 end;
 
 procedure TTaskCard.DoDelete;
 begin
   // Ask for confirmation before removing the component
-  if MessageDlg(
-    'Excluir tarefa',
-    'Tem certeza que deseja excluir a tarefa "' + FTaskCode + '"?',
-    mtConfirmation,
-    [mbYes, mbNo],
-    0
-  ) = mrYes then
+  if MessageDlg('Excluir tarefa', 'Tem certeza que deseja excluir a tarefa "' +
+    FTaskCode + '"?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
     // Fire the optional user event first so the host can clean up references
-    if Assigned(FOnDelete) then FOnDelete(Self);
+    if Assigned(FOnDeleteClick) then FOnDeleteClick(Self);
     // Schedule free via Application.QueueAsyncCall to avoid destroying self
     // while still inside an event chain
-    Free;
+    Application.QueueAsyncCall(@DeferredFree, 0);
   end;
 end;
 
-procedure TTaskCard.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+procedure TTaskCard.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: integer);
+var
+  ClickedButton: integer;
+  I: integer;
 begin
   inherited MouseDown(Button, Shift, X, Y);
 
   if Button = mbLeft then
   begin
-    case FHoveredButton of
+    ClickedButton := 0;
+    for I := 1 to 3 do
+    begin
+      if PtInRect(GetButtonRect(I), Point(X, Y)) then
+      begin
+        ClickedButton := I;
+        Break;
+      end;
+    end;
+
+    case ClickedButton of
       1: DoCopy;
       2: DoEdit;
       3: DoDelete;
-    else
-      BeginDrag(False);
+      else
+        BeginDrag(False);
     end;
   end;
 end;
@@ -523,34 +558,35 @@ begin
   Invalidate;
 end;
 
-procedure TTaskCard.DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+procedure TTaskCard.DragOver(Source: TObject; X, Y: integer;
+  State: TDragState; var Accept: boolean);
 begin
   inherited DragOver(Source, X, Y, State, Accept);
   Accept := (Source is TTaskCard) and (Source <> Self);
-  
+
   if Accept then
   begin
     case State of
       dsDragEnter:
-        begin
-          FIsDragTarget := True;
-          Invalidate;
-        end;
+      begin
+        FIsDragTarget := True;
+        Invalidate;
+      end;
       dsDragLeave:
-        begin
-          FIsDragTarget := False;
-          Invalidate;
-        end;
+      begin
+        FIsDragTarget := False;
+        Invalidate;
+      end;
     end;
   end;
 end;
 
-procedure TTaskCard.DragDrop(Source: TObject; X, Y: Integer);
+procedure TTaskCard.DragDrop(Source: TObject; X, Y: integer);
 begin
   inherited DragDrop(Source, X, Y);
   FIsDragTarget := False;
   Invalidate;
-  
+
   if (Source is TTaskCard) and (Parent <> nil) then
   begin
     if Parent is THeaderScrollBox then

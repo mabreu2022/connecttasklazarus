@@ -35,6 +35,7 @@ type
     ScrollBox1: TScrollBox;
     StatusBar1: TStatusBar;
     WorkspaceHeader1: TPanelAreaTrabalho;
+    procedure BoardCard1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure BitBtn3Click(Sender: TObject);
     procedure BitBtn4Click(Sender: TObject);
@@ -56,6 +57,9 @@ var
   Form1: TForm1;
 
 implementation
+
+uses
+  uListas;
 
 {$R *.lfm}
 
@@ -79,6 +83,11 @@ begin
       TBoardCard(Ctrl).OnClick := @BoardCardClick;
     end;
   end;
+end;
+
+procedure TForm1.BoardCard1Click(Sender: TObject);
+begin
+
 end;
 
 procedure TForm1.BitBtn3Click(Sender: TObject);
@@ -181,7 +190,10 @@ end;
 
 procedure TForm1.BoardCardClick(Sender: TObject);
 begin
-  ShowMessage('Acessando o Quadro: ' + TBoardCard(Sender).BoardTitle);
+  if Form2 = nil then
+    Application.CreateForm(TForm2, Form2);
+  Form2.Caption := TBoardCard(Sender).BoardTitle;
+  Form2.Show;
 end;
 
 end.

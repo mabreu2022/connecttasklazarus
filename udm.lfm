@@ -138,4 +138,37 @@ object DataModule1: TDataModule1
         ParamType = ptInput
       end>
   end
+  object IBQ_Login: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'SELECT ID, USERNAME, EMAIL, "PASSWORD" FROM "User" WHERE EMAIL = :EMAIL'
+    )
+    Params = <    
+      item
+        DataType = ftString
+        Name = 'EMAIL'
+        ParamType = ptInput
+      end>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 172
+    Top = 295
+    ParamData = <    
+      item
+        DataType = ftString
+        Name = 'EMAIL'
+        ParamType = ptInput
+      end>
+  end
 end

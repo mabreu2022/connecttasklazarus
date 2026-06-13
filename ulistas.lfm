@@ -7,6 +7,7 @@ object Form2: TForm2
   ClientHeight = 490
   ClientWidth = 1180
   LCLVersion = '4.8.0.0'
+  OnCreate = FormCreate
   object Panel1: TPanel
     Left = 0
     Height = 50
@@ -87,7 +88,7 @@ object Form2: TForm2
     Top = 50
     Width = 1180
     HorzScrollBar.Page = 1176
-    VertScrollBar.Page = 250
+    VertScrollBar.Page = 298
     Align = alClient
     ClientHeight = 396
     ClientWidth = 1176
@@ -118,7 +119,7 @@ object Form2: TForm2
       Top = 0
       Width = 1070
       HorzScrollBar.Page = 1066
-      VertScrollBar.Page = 246
+      VertScrollBar.Page = 294
       Align = alClient
       ClientHeight = 392
       ClientWidth = 1066
@@ -218,7 +219,7 @@ object Form2: TForm2
         Top = 0
         Width = 166
         HorzScrollBar.Page = 75
-        VertScrollBar.Page = 242
+        VertScrollBar.Page = 290
         Align = alLeft
         BorderSpacing.Left = 10
         ClientHeight = 388
@@ -235,14 +236,13 @@ object Form2: TForm2
         HeaderCaption = 'Em Andamento'
         object TaskCard3: TTaskCard
           Left = 0
-          Height = 192
+          Height = 240
           Top = 50
           Width = 162
           TaskCode = '#6F4895'
           TaskText = 'quando movemos uma tarefa para outra lista outro usuario logado no sistema deve ver essa alteração em tempo real e não precisar aperta f5'
           TaskDate = '22/01/2026'
           UserName = 'mauricio abreu'
-          BackgroundColor = clRed
           Align = alTop
         end
       end
