@@ -44,12 +44,32 @@ type
     constructor Create(AOwner: TComponent; AScrollBox: THeaderScrollBox); reintroduce;
   end;
 
+  { TDropIndicatorLine }
+
+  TDropIndicatorLine = class(TGraphicControl)
+  protected
+    procedure Paint; override;
+  end;
+
+  { TCardContentScrollBox }
+
+  TCardContentScrollBox = class(TScrollBox)
+  private
+    FHeaderScrollBox: THeaderScrollBox;
+  protected
+    procedure RemoveControl(AControl: TControl); override;
+  public
+    constructor Create(AOwner: TComponent; AHeaderScrollBox: THeaderScrollBox); reintroduce;
+  end;
+
   { THeaderScrollBox }
 
-  THeaderScrollBox = class(TScrollBox)
+  THeaderScrollBox = class(TPanel)
   private
     FHeaderPanel: TListHeaderPanel;
     FAddCardPanel: TAddCardPanel;
+    FScrollBox: TCardContentScrollBox;
+    FDropIndicator: TDropIndicatorLine;
     FListID: Integer;
     FDefaultUserName: string;
     FOnCardMoved: TCardMovedEvent;
@@ -58,8 +78,15 @@ type
     FOnCardDelete: TNotifyEvent;
     FOnCardAdded: TCardAddedEvent;
     FOnListDelete: TNotifyEvent;
+    
+    FDropIndicatorY: Integer;    // Y coordinate (in scrollbox coords) of insertion line
+    
     procedure HeaderPanelDragOver(Sender: TObject; Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
     procedure HeaderPanelDragDrop(Sender: TObject; Source: TObject; X, Y: Integer);
+    procedure AddCardPanelDragOver(Sender: TObject; Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+    procedure AddCardPanelDragDrop(Sender: TObject; Source: TObject; X, Y: Integer);
+    procedure ScrollBoxDragOver(Sender: TObject; Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+    procedure ScrollBoxDragDrop(Sender: TObject; Source: TObject; X, Y: Integer);
     function GetHeaderHeight: Integer;
     procedure SetHeaderHeight(AValue: Integer);
     function GetHeaderColor: TColor;
@@ -68,20 +95,18 @@ type
     procedure SetHeaderCaption(const AValue: string);
     procedure DeferredFree(Data: PtrInt);
   protected
-    procedure Loaded; override;
     procedure CreateWnd; override;
     procedure Resize; override;
-    procedure AlignControls(AControl: TControl; var ARect: TRect); override;
-    procedure Paint; override;
-    procedure DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean); override;
   public
     constructor Create(AOwner: TComponent); override;
-    procedure RemoveControl(AControl: TControl); override;
-    procedure DragDrop(Source: TObject; X, Y: Integer); override;
+    procedure SetColor(AValue: TColor); override;
     procedure HandleCardDrop(Card: TTaskCard; TargetCard: TTaskCard);
+    procedure GetSortedCards(AList: TList);
+    function FindNextCard(CurrentCard: TTaskCard): TTaskCard;
     function GetTaskCount: Integer;
     procedure AddNewCard;
     procedure DeleteList;
+    property CardsScrollBox: TCardContentScrollBox read FScrollBox;
   published
     property HeaderPanel: TListHeaderPanel read FHeaderPanel;
     property HeaderHeight: Integer read GetHeaderHeight write SetHeaderHeight default 50;
@@ -104,6 +129,38 @@ implementation
 procedure Register;
 begin
   RegisterComponents('ConnectTask', [THeaderScrollBox]);
+end;
+
+{ TDropIndicatorLine }
+
+procedure TDropIndicatorLine.Paint;
+begin
+  Canvas.AntialiasingMode := amOn;
+  Canvas.Pen.Color := RGB(24, 182, 255); // electric blue
+  Canvas.Pen.Width := 3;
+  Canvas.Pen.Style := psSolid;
+  Canvas.Line(8, Height div 2, Width - 8, Height div 2);
+  
+  Canvas.Brush.Color := RGB(24, 182, 255);
+  Canvas.Brush.Style := bsSolid;
+  Canvas.Pen.Width := 1;
+  Canvas.Ellipse(4, (Height div 2) - 4, 12, (Height div 2) + 4);
+  Canvas.Ellipse(Width - 12, (Height div 2) - 4, Width - 4, (Height div 2) + 4);
+end;
+
+{ TCardContentScrollBox }
+
+constructor TCardContentScrollBox.Create(AOwner: TComponent; AHeaderScrollBox: THeaderScrollBox);
+begin
+  inherited Create(AOwner);
+  FHeaderScrollBox := AHeaderScrollBox;
+end;
+
+procedure TCardContentScrollBox.RemoveControl(AControl: TControl);
+begin
+  inherited RemoveControl(AControl);
+  if (AControl is TTaskCard) and (FHeaderScrollBox <> nil) and (FHeaderScrollBox.HeaderPanel <> nil) then
+    FHeaderScrollBox.HeaderPanel.Invalidate;
 end;
 
 { TPriorityDialogHelper }
@@ -442,34 +499,41 @@ begin
   inherited Create(AOwner);
   
   DoubleBuffered := True;
+  BevelOuter := bvNone;
+  BevelInner := bvNone;
   BorderStyle := bsNone;
   Color := $6B4B2D; // Default premium dark slate blue color (BGR)
   FDefaultUserName := 'mauricio abreu';
   
-  AutoScroll := False;
-  HorzScrollBar.Visible := False;
-  HorzScrollBar.Range := 0;
-  VertScrollBar.Tracking := True;
-  
   FHeaderPanel := TListHeaderPanel.Create(Self, Self);
   FHeaderPanel.Name := 'HeaderPanel';
+  FHeaderPanel.Align := alTop;
   FHeaderPanel.OnDragOver := @HeaderPanelDragOver;
   FHeaderPanel.OnDragDrop := @HeaderPanelDragDrop;
   
   FAddCardPanel := TAddCardPanel.Create(Self, Self);
   FAddCardPanel.Name := 'AddCardPanel';
+  FAddCardPanel.Align := alBottom;
+  FAddCardPanel.OnDragOver := @AddCardPanelDragOver;
+  FAddCardPanel.OnDragDrop := @AddCardPanelDragDrop;
+  
+  FScrollBox := TCardContentScrollBox.Create(Self, Self);
+  FScrollBox.Name := 'CardScrollBox';
+  FScrollBox.Parent := Self;
+  FScrollBox.Align := alClient;
+  FScrollBox.BorderStyle := bsNone;
+  FScrollBox.HorzScrollBar.Visible := False;
+  FScrollBox.VertScrollBar.Tracking := True;
+  FScrollBox.OnDragOver := @ScrollBoxDragOver;
+  FScrollBox.OnDragDrop := @ScrollBoxDragDrop;
+  
+  FDropIndicator := TDropIndicatorLine.Create(Self);
+  FDropIndicator.Parent := FScrollBox;
+  FDropIndicator.Visible := False;
   
   FHeaderPanel.SetSubComponent(True);
   FAddCardPanel.SetSubComponent(True);
-end;
-
-procedure THeaderScrollBox.Loaded;
-begin
-  inherited Loaded;
-  if FHeaderPanel <> nil then
-    FHeaderPanel.Align := alNone;
-  if FAddCardPanel <> nil then
-    FAddCardPanel.Align := alNone;
+  FScrollBox.SetSubComponent(True);
 end;
 
 procedure THeaderScrollBox.CreateWnd;
@@ -477,9 +541,6 @@ var
   Rgn: HRGN;
 begin
   inherited CreateWnd;
-  if FHeaderPanel <> nil then
-    FHeaderPanel.BringToFront;
-    
   if HandleAllocated then
   begin
     Rgn := CreateRoundRectRgn(0, 0, Width, Height, 16, 16);
@@ -499,83 +560,17 @@ begin
   end;
 end;
 
-procedure THeaderScrollBox.RemoveControl(AControl: TControl);
+
+
+procedure THeaderScrollBox.SetColor(AValue: TColor);
 begin
-  inherited RemoveControl(AControl);
-  if (AControl is TTaskCard) and (FHeaderPanel <> nil) then
-    FHeaderPanel.Invalidate;
-end;
-
-procedure THeaderScrollBox.AlignControls(AControl: TControl; var ARect: TRect);
-var
-  TotalHeight: Integer;
-  I: Integer;
-  Ctrl: TControl;
-  NewRange: Integer;
-  NewVisible: Boolean;
-begin
-  // Calculate vertical scroll range manually based on task cards
-  TotalHeight := 0;
-  for I := 0 to ControlCount - 1 do
-  begin
-    Ctrl := Controls[I];
-    if (Ctrl is TTaskCard) and Ctrl.Visible then
-      TotalHeight := TotalHeight + Ctrl.Height;
-  end;
-
-  NewRange := TotalHeight + FHeaderPanel.Height + FAddCardPanel.Height;
-  if VertScrollBar.Range <> NewRange then
-    VertScrollBar.Range := NewRange;
-
-  NewVisible := NewRange > ClientHeight;
-  if VertScrollBar.Visible <> NewVisible then
-    VertScrollBar.Visible := NewVisible;
-
+  inherited SetColor(AValue);
+  if FScrollBox <> nil then
+    FScrollBox.Color := AValue;
   if FHeaderPanel <> nil then
-  begin
     FHeaderPanel.Invalidate;
-    if (FHeaderPanel.Left <> HorzScrollBar.Position) or
-       (FHeaderPanel.Top <> VertScrollBar.Position) or
-       (FHeaderPanel.Width <> ClientWidth) then
-    begin
-      FHeaderPanel.SetBounds(
-        HorzScrollBar.Position,
-        VertScrollBar.Position,
-        ClientWidth,
-        FHeaderPanel.Height
-      );
-    end;
-  end;
-
   if FAddCardPanel <> nil then
-  begin
-    if (FAddCardPanel.Left <> HorzScrollBar.Position) or
-       (FAddCardPanel.Top <> VertScrollBar.Position + ClientHeight - FAddCardPanel.Height) or
-       (FAddCardPanel.Width <> ClientWidth) then
-    begin
-      FAddCardPanel.SetBounds(
-        HorzScrollBar.Position,
-        VertScrollBar.Position + ClientHeight - FAddCardPanel.Height,
-        ClientWidth,
-        FAddCardPanel.Height
-      );
-    end;
-  end;
-
-  if FHeaderPanel <> nil then
-    ARect.Top := ARect.Top + FHeaderPanel.Height;
-  if FAddCardPanel <> nil then
-    ARect.Bottom := ARect.Bottom - FAddCardPanel.Height;
-
-  inherited AlignControls(AControl, ARect);
-end;
-
-procedure THeaderScrollBox.Paint;
-begin
-  inherited Paint;
-  Canvas.Brush.Color := Color;
-  Canvas.Brush.Style := bsSolid;
-  Canvas.FillRect(ClientRect);
+    FAddCardPanel.Invalidate;
 end;
 
 function THeaderScrollBox.GetHeaderHeight: Integer;
@@ -625,9 +620,12 @@ var
   I: Integer;
 begin
   Result := 0;
-  for I := 0 to ControlCount - 1 do
-    if Controls[I] is TTaskCard then
-      Inc(Result);
+  if FScrollBox <> nil then
+  begin
+    for I := 0 to FScrollBox.ControlCount - 1 do
+      if FScrollBox.Controls[I] is TTaskCard then
+        Inc(Result);
+  end;
 end;
 
 procedure THeaderScrollBox.AddNewCard;
@@ -722,6 +720,20 @@ procedure THeaderScrollBox.HeaderPanelDragOver(Sender: TObject; Source: TObject;
   X, Y: Integer; State: TDragState; var Accept: Boolean);
 begin
   Accept := Source is TTaskCard;
+  if Accept then
+  begin
+    if State = dsDragLeave then
+    begin
+      FDropIndicator.Visible := False;
+    end
+    else
+    begin
+      FDropIndicatorY := 2;
+      FDropIndicator.SetBounds(0, FDropIndicatorY - 4, FScrollBox.ClientWidth, 8);
+      FDropIndicator.Visible := True;
+      FDropIndicator.BringToFront;
+    end;
+  end;
 end;
 
 procedure THeaderScrollBox.HeaderPanelDragDrop(Sender: TObject; Source: TObject;
@@ -732,14 +744,16 @@ var
   I: Integer;
   Ctrl: TControl;
 begin
+  FDropIndicator.Visible := False;
+
   if Source is TTaskCard then
   begin
     TargetCard := nil;
     SortedCards := TList.Create;
     try
-      for I := 0 to ControlCount - 1 do
+      for I := 0 to FScrollBox.ControlCount - 1 do
       begin
-        Ctrl := Controls[I];
+        Ctrl := FScrollBox.Controls[I];
         if (Ctrl is TTaskCard) and (Ctrl <> Source) then
           SortedCards.Add(Ctrl);
       end;
@@ -754,13 +768,112 @@ begin
   end;
 end;
 
-procedure THeaderScrollBox.DragOver(Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
+procedure THeaderScrollBox.AddCardPanelDragOver(Sender: TObject; Source: TObject;
+  X, Y: Integer; State: TDragState; var Accept: Boolean);
+var
+  SortedCards: TList;
+  Ctrl: TControl;
 begin
-  inherited DragOver(Source, X, Y, State, Accept);
   Accept := Source is TTaskCard;
+  if Accept then
+  begin
+    if State = dsDragLeave then
+    begin
+      FDropIndicator.Visible := False;
+    end
+    else
+    begin
+      SortedCards := TList.Create;
+      try
+        GetSortedCards(SortedCards);
+        if SortedCards.Count > 0 then
+        begin
+          Ctrl := TControl(SortedCards[SortedCards.Count - 1]);
+          FDropIndicatorY := Ctrl.Top + Ctrl.Height + 2;
+        end
+        else
+          FDropIndicatorY := 4;
+          
+        FDropIndicator.SetBounds(0, FDropIndicatorY - 4, FScrollBox.ClientWidth, 8);
+        FDropIndicator.Visible := True;
+        FDropIndicator.BringToFront;
+      finally
+        SortedCards.Free;
+      end;
+    end;
+  end;
 end;
 
-procedure THeaderScrollBox.DragDrop(Source: TObject; X, Y: Integer);
+procedure THeaderScrollBox.AddCardPanelDragDrop(Sender: TObject; Source: TObject;
+  X, Y: Integer);
+begin
+  FDropIndicator.Visible := False;
+  
+  if Source is TTaskCard then
+    HandleCardDrop(TTaskCard(Source), nil);
+end;
+
+procedure THeaderScrollBox.ScrollBoxDragOver(Sender: TObject; Source: TObject;
+  X, Y: Integer; State: TDragState; var Accept: Boolean);
+var
+  TargetCard: TTaskCard;
+  I: Integer;
+  Ctrl: TControl;
+  SortedCards: TList;
+begin
+  Accept := Source is TTaskCard;
+  
+  if Accept then
+  begin
+    if State = dsDragLeave then
+    begin
+      FDropIndicator.Visible := False;
+    end
+    else
+    begin
+      TargetCard := nil;
+      SortedCards := TList.Create;
+      try
+        for I := 0 to FScrollBox.ControlCount - 1 do
+        begin
+          Ctrl := FScrollBox.Controls[I];
+          if (Ctrl is TTaskCard) and (Ctrl <> Source) then
+            SortedCards.Add(Ctrl);
+        end;
+        SortCardsByTop(SortedCards);
+        
+        for I := 0 to SortedCards.Count - 1 do
+        begin
+          Ctrl := TControl(SortedCards[I]);
+          if Ctrl.Top + (Ctrl.Height div 2) > Y then
+          begin
+            TargetCard := TTaskCard(Ctrl);
+            Break;
+          end;
+        end;
+        
+        if TargetCard <> nil then
+          FDropIndicatorY := TargetCard.Top - 2
+        else if SortedCards.Count > 0 then
+        begin
+          Ctrl := TControl(SortedCards[SortedCards.Count - 1]);
+          FDropIndicatorY := Ctrl.Top + Ctrl.Height + 2;
+        end
+        else
+          FDropIndicatorY := 4;
+        
+        FDropIndicator.SetBounds(0, FDropIndicatorY - 4, FScrollBox.ClientWidth, 8);
+        FDropIndicator.Visible := True;
+        FDropIndicator.BringToFront;
+      finally
+        SortedCards.Free;
+      end;
+    end;
+  end;
+end;
+
+procedure THeaderScrollBox.ScrollBoxDragDrop(Sender: TObject; Source: TObject;
+  X, Y: Integer);
 var
   Card: TTaskCard;
   TargetCard: TTaskCard;
@@ -768,7 +881,8 @@ var
   Ctrl: TControl;
   SortedCards: TList;
 begin
-  inherited DragDrop(Source, X, Y);
+  FDropIndicator.Visible := False;
+  
   if Source is TTaskCard then
   begin
     Card := TTaskCard(Source);
@@ -776,9 +890,9 @@ begin
     
     SortedCards := TList.Create;
     try
-      for I := 0 to ControlCount - 1 do
+      for I := 0 to FScrollBox.ControlCount - 1 do
       begin
-        Ctrl := Controls[I];
+        Ctrl := FScrollBox.Controls[I];
         if (Ctrl is TTaskCard) and (Ctrl <> Card) then
           SortedCards.Add(Ctrl);
       end;
@@ -812,15 +926,17 @@ begin
   
   SourceList := nil;
   if Card.Parent is THeaderScrollBox then
-    SourceList := THeaderScrollBox(Card.Parent);
+    SourceList := THeaderScrollBox(Card.Parent)
+  else if (Card.Parent <> nil) and (Card.Parent.Parent is THeaderScrollBox) then
+    SourceList := THeaderScrollBox(Card.Parent.Parent);
 
-  Card.Parent := Self;
+  Card.Parent := FScrollBox;
 
   SortedCards := TList.Create;
   try
-    for I := 0 to ControlCount - 1 do
+    for I := 0 to FScrollBox.ControlCount - 1 do
     begin
-      Ctrl := Controls[I];
+      Ctrl := FScrollBox.Controls[I];
       if (Ctrl is TTaskCard) and (Ctrl <> Card) then
         SortedCards.Add(Ctrl);
     end;
@@ -836,15 +952,12 @@ begin
     
     SortedCards.Insert(InsertIdx, Card);
 
-    DisableAlign;
+    FScrollBox.DisableAlign;
     try
       for I := SortedCards.Count - 1 downto 0 do
         TControl(SortedCards[I]).BringToFront;
-        
-      if FHeaderPanel <> nil then
-        FHeaderPanel.BringToFront;
     finally
-      EnableAlign;
+      FScrollBox.EnableAlign;
     end;
     
   finally
@@ -853,6 +966,37 @@ begin
 
   if Assigned(FOnCardMoved) then
     FOnCardMoved(Self, Card, SourceList, Self);
+end;
+
+procedure THeaderScrollBox.GetSortedCards(AList: TList);
+var
+  I: Integer;
+begin
+  AList.Clear;
+  if FScrollBox <> nil then
+  begin
+    for I := 0 to FScrollBox.ControlCount - 1 do
+      if FScrollBox.Controls[I] is TTaskCard then
+        AList.Add(FScrollBox.Controls[I]);
+    SortCardsByTop(AList);
+  end;
+end;
+
+function THeaderScrollBox.FindNextCard(CurrentCard: TTaskCard): TTaskCard;
+var
+  SortedCards: TList;
+  I, Idx: Integer;
+begin
+  Result := nil;
+  SortedCards := TList.Create;
+  try
+    GetSortedCards(SortedCards);
+    Idx := SortedCards.IndexOf(CurrentCard);
+    if (Idx >= 0) and (Idx < SortedCards.Count - 1) then
+      Result := TTaskCard(SortedCards[Idx + 1]);
+  finally
+    SortedCards.Free;
+  end;
 end;
 
 end.

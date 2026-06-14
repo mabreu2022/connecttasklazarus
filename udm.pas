@@ -20,6 +20,7 @@ type
     IBQ_Login: TIBQuery;
     IBQ_List: TIBQuery;
     IBQ_Card: TIBQuery;
+    procedure DataModuleCreate(Sender: TObject);
   private
 
   public
@@ -32,6 +33,18 @@ var
 implementation
 
 {$R *.lfm}
+
+procedure TDataModule1.DataModuleCreate(Sender: TObject);
+begin
+  IBDatabase1.Connected := False;
+  IBDatabase1.LoginPrompt := False;
+  
+  // Configure parameters explicitly to prevent runtime login prompts
+  IBDatabase1.Params.Clear;
+  IBDatabase1.Params.Add('user_name=SYSDBA');
+  IBDatabase1.Params.Add('password=ZmrL9W79B48nUeUBOPK0');
+  IBDatabase1.Params.Add('lc_ctype=UTF8');
+end;
 
 end.
 

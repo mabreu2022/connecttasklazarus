@@ -28,6 +28,7 @@ type
     FHoveredButton: integer; // 0 = none, 1 = copy, 2 = edit, 3 = delete
     FIsHovered: boolean;
     FIsDragTarget: boolean;
+    FDragOverAtTop: boolean;
 
     // Events
     FOnCopyClick: TNotifyEvent;
@@ -63,6 +64,7 @@ type
     procedure MouseEnter; override;
     procedure DragOver(Source: TObject; X, Y: integer; State: TDragState;
       var Accept: boolean); override;
+    procedure SetParent(AParent: TWinControl); override;
   public
     constructor Create(AOwner: TComponent); override;
     procedure DragDrop(Source: TObject; X, Y: integer); override;
@@ -145,8 +147,9 @@ begin
   FDateColor := $71717A;       // Muted gray
   FCodeColor := $A1A1AA;       // Lighter gray for task code
 
-  FHoveredButton := 0;
-  FIsHovered := False;
+  // Drag support
+  DragMode := dmAutomatic;
+  DragCursor := crSizeAll;
 end;
 
 procedure TTaskCard.SetTaskCode(AValue: string);
@@ -325,6 +328,32 @@ begin
     Canvas.RoundRect(1, 1, Width - 1, Height - 1, 16, 16)
   else
     Canvas.RoundRect(0, 0, Width, Height, 16, 16);
+
+  // Draw drop position indicator (electric blue line) if dragging over this card
+  if FIsDragTarget then
+  begin
+    Canvas.Pen.Color := RGB(24, 182, 255); // #18B6FF electric blue
+    Canvas.Pen.Width := 3;
+    Canvas.Pen.Style := psSolid;
+    if FDragOverAtTop then
+    begin
+      Canvas.Line(8, 2, Width - 8, 2);
+      Canvas.Brush.Color := RGB(24, 182, 255);
+      Canvas.Brush.Style := bsSolid;
+      Canvas.Pen.Width := 1;
+      Canvas.Ellipse(4, 0, 12, 4);
+      Canvas.Ellipse(Width - 12, 0, Width - 4, 4);
+    end
+    else
+    begin
+      Canvas.Line(8, Height - 3, Width - 8, Height - 3);
+      Canvas.Brush.Color := RGB(24, 182, 255);
+      Canvas.Brush.Style := bsSolid;
+      Canvas.Pen.Width := 1;
+      Canvas.Ellipse(4, Height - 5, 12, Height - 1);
+      Canvas.Ellipse(Width - 12, Height - 5, Width - 4, Height - 1);
+    end;
+  end;
 
   // 2. Draw Task Code (Top-Left)
   Canvas.Font.Name := 'Segoe UI';
@@ -545,8 +574,8 @@ var
   ClickedButton: integer;
   I: integer;
 begin
-  inherited MouseDown(Button, Shift, X, Y);
-
+  // Check if we're on an action button FIRST - if so, handle it
+  // and suppress drag start (BeginDrag would be called by dmAutomatic otherwise)
   if Button = mbLeft then
   begin
     ClickedButton := 0;
@@ -559,14 +588,24 @@ begin
       end;
     end;
 
-    case ClickedButton of
-      1: DoCopy;
-      2: DoEdit;
-      3: DoDelete;
-      else
-        BeginDrag(False);
+    if ClickedButton > 0 then
+    begin
+      // Button was clicked - stop automatic drag from starting
+      DragMode := dmManual;
+      inherited MouseDown(Button, Shift, X, Y);
+      case ClickedButton of
+        1: DoCopy;
+        2: DoEdit;
+        3: DoDelete;
+      end;
+      DragMode := dmAutomatic; // Restore after handling
+      Exit;
     end;
   end;
+
+  // Not a button click - let inherited handle it;
+  // dmAutomatic will start BeginDrag automatically after a short move
+  inherited MouseDown(Button, Shift, X, Y);
 end;
 
 procedure TTaskCard.MouseEnter;
@@ -587,17 +626,29 @@ end;
 
 procedure TTaskCard.DragOver(Source: TObject; X, Y: integer;
   State: TDragState; var Accept: boolean);
+var
+  NewAtTop: boolean;
 begin
   inherited DragOver(Source, X, Y, State, Accept);
   Accept := (Source is TTaskCard) and (Source <> Self);
 
   if Accept then
   begin
+    NewAtTop := Y < (Height div 2);
     case State of
       dsDragEnter:
       begin
         FIsDragTarget := True;
+        FDragOverAtTop := NewAtTop;
         Invalidate;
+      end;
+      dsDragMove:
+      begin
+        if FDragOverAtTop <> NewAtTop then
+        begin
+          FDragOverAtTop := NewAtTop;
+          Invalidate;
+        end;
       end;
       dsDragLeave:
       begin
@@ -609,6 +660,9 @@ begin
 end;
 
 procedure TTaskCard.DragDrop(Source: TObject; X, Y: integer);
+var
+  HeaderBox: THeaderScrollBox;
+  P: TControl;
 begin
   inherited DragDrop(Source, X, Y);
   FIsDragTarget := False;
@@ -616,9 +670,34 @@ begin
 
   if (Source is TTaskCard) and (Parent <> nil) then
   begin
-    if Parent is THeaderScrollBox then
-      THeaderScrollBox(Parent).HandleCardDrop(TTaskCard(Source), Self);
+    HeaderBox := nil;
+    P := Parent;
+    while P <> nil do
+    begin
+      if P is THeaderScrollBox then
+      begin
+        HeaderBox := THeaderScrollBox(P);
+        Break;
+      end;
+      P := P.Parent;
+    end;
+
+    if HeaderBox <> nil then
+    begin
+      if FDragOverAtTop then
+        HeaderBox.HandleCardDrop(TTaskCard(Source), Self)
+      else
+        HeaderBox.HandleCardDrop(TTaskCard(Source), HeaderBox.FindNextCard(Self));
+    end;
   end;
+end;
+
+procedure TTaskCard.SetParent(AParent: TWinControl);
+begin
+  if (AParent <> nil) and (AParent is THeaderScrollBox) then
+    inherited SetParent(THeaderScrollBox(AParent).CardsScrollBox)
+  else
+    inherited SetParent(AParent);
 end;
 
 end.

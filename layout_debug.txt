@@ -1,0 +1,10 @@
+--- Sibling Controls of ScrollBox2 ---
+Index: 0, Name: , Title: Backlog, Left: 0, Visible: 1
+Index: 1, Name: , Title: Design, Left: 300, Visible: 1
+Index: 2, Name: , Title:  Integrações, Left: 600, Visible: 1
+Index: 3, Name: , Title: A Fazer, Left: 900, Visible: 1
+Index: 4, Name: , Title: Em andamento, Left: 1200, Visible: 1
+Index: 5, Name: , Title: Revisão de código, Left: 1500, Visible: 1
+Index: 6, Name: , Title: Fase de teste, Left: 1800, Visible: 1
+Index: 7, Name: , Title: Concluido 🎉, Left: 2100, Visible: 1
+Index: 8, Name: , Title: Cancelados, Left: 2400, Visible: 1

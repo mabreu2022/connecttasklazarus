@@ -253,6 +253,8 @@ begin
   NewBox := THeaderScrollBox.Create(Self);
   NewBox.Parent := ScrollBox2;
   NewBox.Align := alLeft;
+  NewBox.Left := NewListID * 300;
+  NewBox.BringToFront;
   NewBox.Width := 220;
   NewBox.BorderSpacing.Left := 10;
   NewBox.BorderSpacing.Right := 4;
@@ -279,7 +281,7 @@ end;
 procedure TForm2.LoadBoard(ABoardID: Integer; const ABoardTitle: string;
   ABoardColor: TColor);
 var
-  I: Integer;
+  I, K: Integer;
   Ctrl: TControl;
   HaveFree: Boolean;
   BgColor, ListColor: TColor;
@@ -289,6 +291,8 @@ var
   NewBox: THeaderScrollBox;
   NewCard: TTaskCard;
   HexStr: string;
+  ColumnsList: TList;
+  CardsList: TList;
 begin
   FBoardID := ABoardID;
   FBoardColor := ABoardColor;
@@ -342,6 +346,8 @@ begin
     end;
   end;
 
+  ColumnsList := TList.Create;
+  CardsList := TList.Create;
   Q_List := TIBQuery.Create(nil);
   Q_Card := TIBQuery.Create(nil);
   try
@@ -367,6 +373,7 @@ begin
         NewBox := THeaderScrollBox.Create(Self);
         NewBox.Parent := ScrollBox2;
         NewBox.Align := alLeft;
+        NewBox.Left := Q_List.FieldByName('IDX_POSITION').AsInteger * 300;
         NewBox.Width := 220;
         NewBox.BorderSpacing.Left := 10;
         NewBox.BorderSpacing.Right := 4;
@@ -381,10 +388,13 @@ begin
         NewBox.OnCardDelete := @TaskCardDelete;
         NewBox.OnCardMoved := @TaskCardMoved;
         NewBox.OnListDelete := @ListDelete;
+        
+        ColumnsList.Add(NewBox);
 
         // Load cards for this list
+        CardsList.Clear;
         Q_Card.SQL.Text :=
-          'SELECT ID, TITLE, TICKETID, CREATEDAT, "hexColor", PRIORITY ' +
+          'SELECT ID, TITLE, TICKETID, CREATEDAT, "hexColor", PRIORITY, IDX_POSITION ' +
           'FROM "Card" WHERE LISTID = :LISTID ORDER BY IDX_POSITION';
         Q_Card.ParamByName('LISTID').DataType := ftInteger;
         Q_Card.ParamByName('LISTID').AsInteger := ListID;
@@ -395,6 +405,7 @@ begin
           NewCard := TTaskCard.Create(Self);
           NewCard.Parent := NewBox;
           NewCard.Align := alTop;
+          NewCard.Top := Q_Card.FieldByName('IDX_POSITION').AsInteger * 250;
           NewCard.CardID := Q_Card.FieldByName('ID').AsInteger;
           NewCard.TaskText := Q_Card.FieldByName('TITLE').AsString;
           NewCard.TaskCode := Q_Card.FieldByName('TICKETID').AsString;
@@ -416,9 +427,19 @@ begin
           NewCard.OnEditClick := @TaskCardEdit;
           NewCard.OnDeleteClick := @TaskCardDelete;
 
+          CardsList.Add(NewCard);
           Q_Card.Next;
         end;
         Q_Card.Close;
+
+        // Force explicit card ordering from top to bottom
+        NewBox.CardsScrollBox.DisableAlign;
+        try
+          for K := 0 to CardsList.Count - 1 do
+            TControl(CardsList[K]).BringToFront;
+        finally
+          NewBox.CardsScrollBox.EnableAlign;
+        end;
 
         Q_List.Next;
       end;
@@ -427,7 +448,19 @@ begin
     end;
 
     Q_List.Close;
+
+    // Force explicit column ordering from left to right
+    ScrollBox2.DisableAlign;
+    try
+      for I := 0 to ColumnsList.Count - 1 do
+        TControl(ColumnsList[I]).BringToFront;
+    finally
+      ScrollBox2.EnableAlign;
+    end;
+
   finally
+    ColumnsList.Free;
+    CardsList.Free;
     Q_List.Free;
     Q_Card.Free;
   end;
@@ -586,44 +619,82 @@ procedure TForm2.TaskCardMoved(Sender: TObject; Card: TTaskCard;
   SourceList, TargetList: THeaderScrollBox);
 var
   Q: TIBQuery;
-  NewPos: Integer;
+  CardsList: TList;
+  I: Integer;
+  C: TTaskCard;
 begin
   if Card.CardID = 0 then Exit;
-  if (TargetList = nil) or (TargetList = SourceList) then Exit;
+  if TargetList = nil then Exit;
 
   Q := TIBQuery.Create(nil);
+  CardsList := TList.Create;
   try
     Q.Database := DataModule1.IBDatabase1;
     Q.Transaction := DataModule1.IBTransaction1;
 
-    // Get current count in target list to use as new position
-    Q.SQL.Text := 'SELECT COUNT(*) FROM "Card" WHERE LISTID = :LISTID';
-    Q.ParamByName('LISTID').DataType := ftInteger;
-    Q.ParamByName('LISTID').AsInteger := TargetList.ListID;
-    Q.Open;
-    NewPos := Q.Fields[0].AsInteger;
-    Q.Close;
+    // If lists are different, update the LISTID of the card first
+    if SourceList <> TargetList then
+    begin
+      Q.SQL.Text := 'UPDATE "Card" SET LISTID = :LISTID, UPDATEDAT = CURRENT_TIMESTAMP WHERE ID = :ID';
+      Q.ParamByName('LISTID').DataType := ftInteger;
+      Q.ParamByName('LISTID').AsInteger := TargetList.ListID;
+      Q.ParamByName('ID').DataType := ftInteger;
+      Q.ParamByName('ID').AsInteger := Card.CardID;
+      Q.ExecSQL;
+    end;
 
-    Q.SQL.Text :=
-      'UPDATE "Card" SET LISTID = :LISTID, IDX_POSITION = :IDX, UPDATEDAT = CURRENT_TIMESTAMP WHERE ID = :ID';
-    Q.ParamByName('LISTID').DataType := ftInteger;
-    Q.ParamByName('LISTID').AsInteger := TargetList.ListID;
-    Q.ParamByName('IDX').DataType := ftInteger;
-    Q.ParamByName('IDX').AsInteger := NewPos;
-    Q.ParamByName('ID').DataType := ftInteger;
-    Q.ParamByName('ID').AsInteger := Card.CardID;
-    Q.ExecSQL;
+    // Now re-index cards in the target list
+    TargetList.GetSortedCards(CardsList);
+    for I := 0 to CardsList.Count - 1 do
+    begin
+      C := TTaskCard(CardsList[I]);
+      if C.CardID <> 0 then
+      begin
+        Q.SQL.Text := 'UPDATE "Card" SET IDX_POSITION = :IDX WHERE ID = :ID';
+        Q.ParamByName('IDX').DataType := ftInteger;
+        Q.ParamByName('IDX').AsInteger := I;
+        Q.ParamByName('ID').DataType := ftInteger;
+        Q.ParamByName('ID').AsInteger := C.CardID;
+        Q.ExecSQL;
+      end;
+    end;
+
+    // If source list was different, also re-index cards in the source list to close the gap
+    if (SourceList <> nil) and (SourceList <> TargetList) then
+    begin
+      CardsList.Clear;
+      SourceList.GetSortedCards(CardsList);
+      for I := 0 to CardsList.Count - 1 do
+      begin
+        C := TTaskCard(CardsList[I]);
+        if C.CardID <> 0 then
+        begin
+          Q.SQL.Text := 'UPDATE "Card" SET IDX_POSITION = :IDX WHERE ID = :ID';
+          Q.ParamByName('IDX').DataType := ftInteger;
+          Q.ParamByName('IDX').AsInteger := I;
+          Q.ParamByName('ID').DataType := ftInteger;
+          Q.ParamByName('ID').AsInteger := C.CardID;
+          Q.ExecSQL;
+        end;
+      end;
+    end;
+
     DataModule1.IBTransaction1.CommitRetaining;
-    StatusBar1.SimpleText :=
-      'Tarefa "' + Card.TaskCode + '" movida para "' + TargetList.HeaderCaption + '".';
+    
+    if SourceList <> TargetList then
+      StatusBar1.SimpleText := 'Tarefa "' + Card.TaskCode + '" movida de "' + SourceList.HeaderCaption + '" para "' + TargetList.HeaderCaption + '".'
+    else
+      StatusBar1.SimpleText := 'Tarefa "' + Card.TaskCode + '" reordenada em "' + TargetList.HeaderCaption + '".';
+      
   except
     on E: Exception do
     begin
-      Q.Free;
-      ShowMessage('Erro ao mover tarefa: ' + E.Message);
-      Exit;
+      DataModule1.IBTransaction1.RollbackRetaining;
+      ShowMessage('Erro ao atualizar posições no banco de dados: ' + E.Message);
     end;
   end;
+  
+  CardsList.Free;
   Q.Free;
 end;
 
