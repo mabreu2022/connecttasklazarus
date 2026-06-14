@@ -18,13 +18,11 @@ type
     BitBtn3: TBitBtn;
     BitBtn4: TBitBtn;
     BitBtn5: TBitBtn;
+    BitBtn6: TBitBtn;
     Edit1: TEdit;
+    Edit3: TEdit;
     HeaderScrollBox1: THeaderScrollBox;
     HeaderScrollBox2: THeaderScrollBox;
-    HeaderScrollBox3: THeaderScrollBox;
-    HeaderScrollBox4: THeaderScrollBox;
-    HeaderScrollBox5: THeaderScrollBox;
-    HeaderScrollBox6: THeaderScrollBox;
     Panel1: TPanel;
     Panel2: TPanel;
     Panel3: TPanel;
@@ -33,8 +31,6 @@ type
     Shape1: TShape;
     StatusBar1: TStatusBar;
     TaskCard1: TTaskCard;
-    TaskCard2: TTaskCard;
-    TaskCard3: TTaskCard;
     procedure FormCreate(Sender: TObject);
     procedure TaskCardCopy(Sender: TObject);
     procedure TaskCardEdit(Sender: TObject);
@@ -50,6 +46,9 @@ var
 
 implementation
 
+uses
+  uLogin;
+
 {$R *.lfm}
 
 procedure TForm2.FormCreate(Sender: TObject);
@@ -64,6 +63,15 @@ begin
     if Components[I] is THeaderScrollBox then
     begin
       Box := THeaderScrollBox(Components[I]);
+      
+      // Assign card actions to the list component
+      Box.OnCardCopy := @TaskCardCopy;
+      Box.OnCardEdit := @TaskCardEdit;
+      Box.OnCardDelete := @TaskCardDelete;
+      
+      // Set the logged-in user name as the default for new tasks
+      Box.DefaultUserName := LoggedUserName;
+      
       for J := 0 to Box.ControlCount - 1 do
       begin
         Ctrl := Box.Controls[J];

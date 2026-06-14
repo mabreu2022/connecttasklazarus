@@ -193,10 +193,35 @@ begin
 end;
 
 procedure TTaskCard.SetBackgroundColor(AValue: TColor);
+var
+  R, G, B: Byte;
+  L: Double;
 begin
   if FBackgroundColor <> AValue then
   begin
     FBackgroundColor := AValue;
+    
+    // Calculate luminance (0.299*R + 0.587*G + 0.114*B) for text contrast
+    R := Red(AValue);
+    G := Green(AValue);
+    B := Blue(AValue);
+    L := 0.299 * R + 0.587 * G + 0.114 * B;
+    
+    if L > 128 then
+    begin
+      // Light background: dark text
+      FTextColor := $222222;
+      FDateColor := $555555;
+      FCodeColor := $666666;
+    end
+    else
+    begin
+      // Dark background: light text
+      FTextColor := $FAFAFA;
+      FDateColor := $71717A;
+      FCodeColor := $A1A1AA;
+    end;
+    
     Invalidate;
   end;
 end;
