@@ -11,6 +11,7 @@ uses
 type
   TTaskCard = class(TCustomControl)
   private
+    FCardID: Integer;
     FTaskCode: string;
     FTaskText: string;
     FTaskDate: string;
@@ -67,6 +68,7 @@ type
     procedure DragDrop(Source: TObject; X, Y: integer); override;
 
   published
+    property CardID: Integer read FCardID write FCardID default 0;
     property TaskCode: string read FTaskCode write SetTaskCode;
     property TaskText: string read FTaskText write SetTaskText;
     property TaskDate: string read FTaskDate write SetTaskDate;

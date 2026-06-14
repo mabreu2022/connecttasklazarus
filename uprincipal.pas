@@ -628,10 +628,17 @@ begin
 end;
 
 procedure TForm1.BoardCardClick(Sender: TObject);
+var
+  BC: TBoardCard;
 begin
+  if not (Sender is TBoardCard) then Exit;
+  BC := TBoardCard(Sender);
+
   if Form2 = nil then
     Application.CreateForm(TForm2, Form2);
-  Form2.Caption := TBoardCard(Sender).BoardTitle;
+
+  // Load the board's lists and tasks dynamically, using the card's StartColor
+  Form2.LoadBoard(BC.BoardID, BC.BoardTitle, BC.StartColor);
   Form2.Show;
 end;
 

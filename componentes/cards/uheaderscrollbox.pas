@@ -11,6 +11,7 @@ type
   THeaderScrollBox = class;
 
   TCardMovedEvent = procedure(Sender: TObject; Card: TTaskCard; SourceList, TargetList: THeaderScrollBox) of object;
+  TCardAddedEvent = procedure(Sender: TObject; Card: TTaskCard) of object;
 
   { TListHeaderPanel }
 
@@ -49,11 +50,14 @@ type
   private
     FHeaderPanel: TListHeaderPanel;
     FAddCardPanel: TAddCardPanel;
+    FListID: Integer;
     FDefaultUserName: string;
     FOnCardMoved: TCardMovedEvent;
     FOnCardCopy: TNotifyEvent;
     FOnCardEdit: TNotifyEvent;
     FOnCardDelete: TNotifyEvent;
+    FOnCardAdded: TCardAddedEvent;
+    FOnListDelete: TNotifyEvent;
     procedure HeaderPanelDragOver(Sender: TObject; Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
     procedure HeaderPanelDragDrop(Sender: TObject; Source: TObject; X, Y: Integer);
     function GetHeaderHeight: Integer;
@@ -83,11 +87,14 @@ type
     property HeaderHeight: Integer read GetHeaderHeight write SetHeaderHeight default 50;
     property HeaderColor: TColor read GetHeaderColor write SetHeaderColor default clDefault;
     property HeaderCaption: string read GetHeaderCaption write SetHeaderCaption;
+    property ListID: Integer read FListID write FListID default 0;
     property DefaultUserName: string read FDefaultUserName write FDefaultUserName;
     property OnCardMoved: TCardMovedEvent read FOnCardMoved write FOnCardMoved;
     property OnCardCopy: TNotifyEvent read FOnCardCopy write FOnCardCopy;
     property OnCardEdit: TNotifyEvent read FOnCardEdit write FOnCardEdit;
     property OnCardDelete: TNotifyEvent read FOnCardDelete write FOnCardDelete;
+    property OnCardAdded: TCardAddedEvent read FOnCardAdded write FOnCardAdded;
+    property OnListDelete: TNotifyEvent read FOnListDelete write FOnListDelete;
   end;
 
 procedure Register;
@@ -648,6 +655,7 @@ begin
     NewCard.Align := alTop;
     NewCard.TaskText := NewText;
     NewCard.BackgroundColor := SelectedColor;
+    NewCard.CardID := 0; // Will be assigned by OnCardAdded handler after DB insert
 
     CodeChars := 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     GeneratedCode := '#';
@@ -666,6 +674,10 @@ begin
     NewCard.OnEditClick := FOnCardEdit;
     NewCard.OnDeleteClick := FOnCardDelete;
 
+    // Fire OnCardAdded so host form can persist to DB and assign CardID
+    if Assigned(FOnCardAdded) then
+      FOnCardAdded(Self, NewCard);
+
     HandleCardDrop(NewCard, nil);
 
     if FHeaderPanel <> nil then
@@ -677,6 +689,9 @@ procedure THeaderScrollBox.DeleteList;
 begin
   if MessageDlg('Excluir Lista', 'Tem certeza que deseja excluir a lista "' + HeaderCaption + '" e todos os seus cartões?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
+    // Fire event so host form can delete from DB first
+    if Assigned(FOnListDelete) then
+      FOnListDelete(Self);
     Application.QueueAsyncCall(@DeferredFree, 0);
   end;
 end;

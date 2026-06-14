@@ -25,6 +25,7 @@ object Form2: TForm2
       Align = alLeft
       BorderSpacing.Left = 10
       Caption = 'Voltar'
+      OnClick = BitBtn1Click
       TabOrder = 0
     end
     object Edit1: TEdit
@@ -40,7 +41,7 @@ object Form2: TForm2
       Height = 30
       Top = 8
       Width = 75
-      Caption = 'Analystics'
+      Caption = 'Analytics'
       TabOrder = 2
     end
     object BitBtn3: TBitBtn
@@ -87,8 +88,8 @@ object Form2: TForm2
     Height = 602
     Top = 50
     Width = 1261
-    HorzScrollBar.Page = 597
-    VertScrollBar.Page = 598
+    HorzScrollBar.Page = 339
+    VertScrollBar.Page = 150
     Align = alClient
     ClientHeight = 598
     ClientWidth = 1257
@@ -118,13 +119,15 @@ object Form2: TForm2
           Width = 57
           Caption = '+'
           Font.Height = -24
+          OnClick = BitBtn6Click
           ParentFont = False
           TabOrder = 0
         end
         object Edit3: TEdit
           Left = 6
           Height = 23
-          Hint = 'Add new list...'
+          Hint = 'Nome da nova lista...'
+          ShowHint = True
           Top = 11
           Width = 105
           TabOrder = 1
@@ -136,87 +139,13 @@ object Form2: TForm2
       Height = 598
       Top = 0
       Width = 1068
-      HorzScrollBar.Page = 404
-      VertScrollBar.Page = 594
+      HorzScrollBar.Page = 1
+      VertScrollBar.Page = 1
       Align = alClient
-      ClientHeight = 594
-      ClientWidth = 1064
       Color = 12635406
       ParentBackground = False
       ParentColor = False
       TabOrder = 1
-      object HeaderScrollBox1: THeaderScrollBox
-        Left = 10
-        Height = 594
-        Top = 0
-        Width = 192
-        HorzScrollBar.Page = 192
-        VertScrollBar.Page = 594
-        Align = alLeft
-        BorderSpacing.Left = 10
-        BorderStyle = bsNone
-        ClientHeight = 594
-        ClientWidth = 192
-        DockSite = True
-        Color = 6709263
-        ParentBackground = False
-        ParentColor = False
-        TabOrder = 0
-        HeaderPanel.Left = 0
-        HeaderPanel.Height = 50
-        HeaderPanel.Top = 0
-        HeaderPanel.Width = 192
-        HeaderPanel.BevelOuter = bvNone
-        HeaderPanel.Caption = 'BackLog'
-        HeaderPanel.DoubleBuffered = True
-        HeaderPanel.ParentBackground = False
-        HeaderPanel.ParentDoubleBuffered = False
-        HeaderPanel.TabOrder = 0
-        HeaderColor = 6709263
-        HeaderCaption = 'BackLog'
-        DefaultUserName = 'mauricio abreu'
-        object TaskCard1: TTaskCard
-          Left = 0
-          Height = 190
-          Top = 50
-          Width = 192
-          TaskCode = '#6F4895'
-          TaskText = 'quando movemos uma tarefa para outra'
-          TaskDate = '22/01/2026'
-          UserName = 'mauricio abreu'
-          Align = alTop
-        end
-      end
-      object HeaderScrollBox2: THeaderScrollBox
-        Left = 212
-        Height = 594
-        Top = 0
-        Width = 192
-        HorzScrollBar.Page = 192
-        VertScrollBar.Page = 594
-        Align = alLeft
-        BorderSpacing.Left = 10
-        BorderStyle = bsNone
-        ClientHeight = 594
-        ClientWidth = 192
-        Color = 6709263
-        ParentBackground = False
-        ParentColor = False
-        TabOrder = 1
-        HeaderPanel.Left = 0
-        HeaderPanel.Height = 50
-        HeaderPanel.Top = 0
-        HeaderPanel.Width = 192
-        HeaderPanel.BevelOuter = bvNone
-        HeaderPanel.Caption = 'Design'
-        HeaderPanel.DoubleBuffered = True
-        HeaderPanel.ParentBackground = False
-        HeaderPanel.ParentDoubleBuffered = False
-        HeaderPanel.TabOrder = 0
-        HeaderColor = 6709263
-        HeaderCaption = 'Design'
-        DefaultUserName = 'mauricio abreu'
-      end
     end
   end
 end
