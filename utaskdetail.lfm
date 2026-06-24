@@ -1,0 +1,16 @@
+object FormTaskDetail: TFormTaskDetail
+  Left = 0
+  Height = 750
+  Top = 0
+  Width = 1100
+  Caption = 'Detalhamento da Tarefa'
+  Color = 1710638
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Segoe UI'
+  LCLVersion = '4.8.0.0'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
+  OnShow = FormShow
+end

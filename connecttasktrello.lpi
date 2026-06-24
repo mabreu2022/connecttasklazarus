@@ -74,6 +74,14 @@
         <Filename Value="uBCrypt.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>
+      <Unit>
+        <Filename Value="utaskdetail.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FormTaskDetail"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uTaskDetail"/>
+      </Unit>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -34,6 +34,7 @@ type
     FOnCopyClick: TNotifyEvent;
     FOnEditClick: TNotifyEvent;
     FOnDeleteClick: TNotifyEvent;
+    FOnCardDetail: TNotifyEvent;
 
     procedure SetTaskCode(AValue: string);
     procedure SetTaskText(AValue: string);
@@ -92,6 +93,7 @@ type
     property OnCopyClick: TNotifyEvent read FOnCopyClick write FOnCopyClick;
     property OnEditClick: TNotifyEvent read FOnEditClick write FOnEditClick;
     property OnDeleteClick: TNotifyEvent read FOnDeleteClick write FOnDeleteClick;
+    property OnCardDetail: TNotifyEvent read FOnCardDetail write FOnCardDetail;
 
     // Re-expose standard properties
     property Align;
@@ -599,6 +601,17 @@ begin
         3: DoDelete;
       end;
       DragMode := dmAutomatic; // Restore after handling
+      Exit;
+    end;
+
+    // No action button clicked → open detail view (fire OnCardDetail)
+    // Suppress drag start so the detail opens immediately on single click
+    if Assigned(FOnCardDetail) then
+    begin
+      DragMode := dmManual;        // prevent drag from starting
+      inherited MouseDown(Button, Shift, X, Y);
+      FOnCardDetail(Self);         // open detail form
+      DragMode := dmAutomatic;     // restore drag for future interactions
       Exit;
     end;
   end;

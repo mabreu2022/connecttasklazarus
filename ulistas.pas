@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
-  Buttons, StdCtrls, uHeaderScrollBox, uTaskCard, db, IBQuery;
+  Buttons, StdCtrls, uHeaderScrollBox, uTaskCard, db, IBQuery, uTaskDetail;
 
 type
 
@@ -52,6 +52,7 @@ type
 
     // Card copy/status handlers
     procedure TaskCardCopy(Sender: TObject);
+    procedure TaskCardDetail(Sender: TObject);
 
   public
     // Called from TForm1 when the user clicks a board card
@@ -426,6 +427,7 @@ begin
           NewCard.OnCopyClick := @TaskCardCopy;
           NewCard.OnEditClick := @TaskCardEdit;
           NewCard.OnDeleteClick := @TaskCardDelete;
+          NewCard.OnCardDetail := @TaskCardDetail;
 
           CardsList.Add(NewCard);
           Q_Card.Next;
@@ -551,6 +553,20 @@ begin
   if Sender is TTaskCard then
     StatusBar1.SimpleText :=
       'Código "' + TTaskCard(Sender).TaskCode + '" copiado para a área de transferência.';
+end;
+
+procedure TForm2.TaskCardDetail(Sender: TObject);
+var
+  Card: TTaskCard;
+begin
+  if not (Sender is TTaskCard) then Exit;
+  Card := TTaskCard(Sender);
+  if Card.CardID = 0 then Exit;
+
+  if FormTaskDetail = nil then
+    FormTaskDetail := TFormTaskDetail.Create(Application);
+
+  FormTaskDetail.LoadCard(Card.CardID);
 end;
 
 procedure TForm2.TaskCardEdit(Sender: TObject);
